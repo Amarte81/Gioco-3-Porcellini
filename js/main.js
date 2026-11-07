@@ -1,14 +1,16 @@
 /**
  * Controller Principale del Gioco - "I Tre Porcellini"
- * Gestisce il Menù Principale, la Mappa delle Casette, il Salvataggio
- * e le meccaniche progressive per:
+ * Gestisce il Menù Principale, la Mappa delle Casette, il Salvataggio,
+ * la Voce Narrante femminile per bambini in età prescolare, l'animazione
+ * della Manina Guida e le meccaniche progressive per:
  * - Casa di Paglia (Click sul mucchio di paglia)
  * - Casa di Legno (Drag & Drop della legna al livello giusto della casa)
- * - Casa di Malta e Mattoni (Alternanza: spargere la malta con la cazzuola nel punto giusto -> posare i mattoni al livello giusto)
+ * - Casa di Malta e Mattoni (Alternanza: spargere la malta strofinando la cazzuola avanti e indietro nel riquadro -> posare i mattoni al livello giusto)
  */
 (function (global) {
   const App = {
     state: null,
+    currentScreen: 'menu',
     activeHouseKey: null,
     isDraggingWood: false,
     isDraggingBrickTool: false,
@@ -18,6 +20,7 @@
     lastScrubY: null,
     dragPointerId: null,
     saveToastTimer: null,
+    handGuideRaf: null,
 
     init() {
       this.cacheDOM();
@@ -29,6 +32,9 @@
     },
 
     cacheDOM() {
+      this.gameStage = document.getElementById('game-stage');
+      this.kidHandGuide = document.getElementById('kid-hand-guide');
+
       // HUD
       this.btnHudMenu = document.getElementById('btn-hud-menu');
       this.btnHudMap = document.getElementById('btn-hud-map');
@@ -43,6 +49,7 @@
       this.screenBuilder = document.getElementById('screen-builder');
 
       // Menu Principale
+      this.btnMenuVoice = document.getElementById('btn-menu-voice');
       this.btnNewGame = document.getElementById('btn-new-game');
       this.btnContinueGame = document.getElementById('btn-continue-game');
       this.continueProgressLabel = document.getElementById('continue-progress-label');
@@ -68,9 +75,11 @@
       this.lockOverlayBrick = document.getElementById('lock-overlay-brick');
 
       // Builder
+      this.pigHelperCard = document.getElementById('pig-helper-card');
       this.builderPigAvatar = document.getElementById('builder-pig-avatar');
       this.builderPigName = document.getElementById('builder-pig-name');
       this.builderSpeechBubble = document.getElementById('builder-speech-bubble');
+      this.btnRepeatVoice = document.getElementById('btn-repeat-voice');
       this.builderStepCounter = document.getElementById('builder-step-counter');
       this.builderProgressFill = document.getElementById('builder-progress-fill');
       this.builderStarsRow = document.getElementById('builder-stars-row');
@@ -141,6 +150,37 @@
       this.btnSoundToggle.addEventListener('click', () => {
         const enabled = global.SoundFX.toggle();
         this.btnSoundToggle.textContent = enabled ? '🔊' : '🔇';
+        if (enabled) {
+          global.SoundFX.repeatLastSpeech();
+        }
+      });
+
+      // Pulsanti Voce Narrante per bambini
+      if (this.btnMenuVoice) {
+        this.btnMenuVoice.addEventListener('click', () => {
+          global.SoundFX.click();
+          this.speakMenuWelcome();
+        });
+      }
+
+      if (this.btnRepeatVoice) {
+        this.btnRepeatVoice.addEventListener('click', (e) => {
+          e.stopPropagation();
+          global.SoundFX.click();
+          global.SoundFX.repeatLastSpeech();
+          this.scheduleHandGuideUpdate();
+        });
+      }
+
+      if (this.pigHelperCard) {
+        this.pigHelperCard.addEventListener('click', () => {
+          global.SoundFX.repeatLastSpeech();
+        });
+      }
+
+      // Ricalcola posizione manina su resize / cambio orientamento
+      window.addEventListener('resize', () => {
+        this.scheduleHandGuideUpdate();
       });
 
       // Schermo Intero On/Off
@@ -161,6 +201,7 @@
           this.btnFullscreenToggle.title = isFs
             ? 'Esci dallo Schermo Intero'
             : 'Attiva Schermo Intero';
+          this.scheduleHandGuideUpdate();
         };
 
         document.addEventListener('fullscreenchange', updateFsIcon);
@@ -180,6 +221,10 @@
 
         if (hasProgress) {
           this.modalConfirmReset.classList.remove('hidden');
+          this.hideKidHandGuide();
+          global.SoundFX.speak(
+            'Vuoi ricominciare da capo tutte le casette? Tocca il pulsante verde per ricominciare, oppure quello grigio per tornare indietro!'
+          );
         } else {
           this.startNewGame();
         }
@@ -194,6 +239,7 @@
       this.btnConfirmResetNo.addEventListener('click', () => {
         global.SoundFX.click();
         this.modalConfirmReset.classList.add('hidden');
+        this.scheduleHandGuideUpdate();
       });
 
       this.btnContinueGame.addEventListener('click', () => {
@@ -213,6 +259,9 @@
         this.state = global.SaveSystem.load();
         if (!this.state.houses.wood.unlocked) {
           global.SoundFX.gentleWrong();
+          global.SoundFX.speak(
+            'Questa casetta di legno ha ancora il lucchetto! Costruiamo prima tutta la casetta di paglia!'
+          );
           return;
         }
         global.SoundFX.click();
@@ -223,6 +272,9 @@
         this.state = global.SaveSystem.load();
         if (!this.state.houses.brick.unlocked) {
           global.SoundFX.gentleWrong();
+          global.SoundFX.speak(
+            'La casetta di mattoni ha ancora il lucchetto! Finisci prima la casetta di legno!'
+          );
           return;
         }
         global.SoundFX.click();
@@ -277,6 +329,248 @@
           this.renderBuilderState();
         }
       });
+    },
+
+    /**
+     * Pronuncia l'invito iniziale ai bambini nella schermata del Menù Principale.
+     */
+    speakMenuWelcome() {
+      const hasSaved = global.SaveSystem.hasSavedGame();
+      if (hasSaved) {
+        global.SoundFX.speak(
+          'Ciao bimbi! Aiutiamo insieme i tre porcellini a costruire le loro casette! Toccate il pulsante verde dove c\'è la manina per continuare a giocare!'
+        );
+      } else {
+        global.SoundFX.speak(
+          'Ciao bimbi! Aiutiamo insieme i tre porcellini a costruire le loro casette! Toccate il pulsante arancione dove c\'è la manina per iniziare!'
+        );
+      }
+    },
+
+    /**
+     * Pronuncia la spiegazione vocale nella Mappa delle Casette.
+     */
+    speakMapWelcome() {
+      this.state = global.SaveSystem.load();
+      const straw = this.state.houses.straw;
+      const wood = this.state.houses.wood;
+      const brick = this.state.houses.brick;
+
+      if (!straw.completed) {
+        global.SoundFX.speak(
+          'Ecco le tre casette! Iniziamo dalla Casetta di Paglia gialla! Toccate la carta dove batte la manina!'
+        );
+      } else if (wood.unlocked && !wood.completed) {
+        global.SoundFX.speak(
+          'Evviva! Adesso possiamo costruire la Casetta di Legno! Toccate la carta al centro dove batte la manina!'
+        );
+      } else if (brick.unlocked && !brick.completed) {
+        global.SoundFX.speak(
+          'Che bravi! Ora costruiamo la grande Casetta di Malta e Mattoni! Toccate la carta a destra dove batte la manina!'
+        );
+      } else {
+        global.SoundFX.speak(
+          'Siete stati bravissimi, avete costruito tutte le casette dei tre porcellini! Toccate una casetta per rigiocare!'
+        );
+      }
+    },
+
+    /**
+     * Aggiorna il fumetto del porcellino e pronuncia il messaggio con la voce femminile italiana.
+     */
+    setSpeechAndSpeak(text) {
+      this.builderSpeechBubble.textContent = text;
+      global.SoundFX.speak(text);
+    },
+
+    /**
+     * Nasconde temporaneamente la manina guida (es. durante il trascinamento o con modale aperta).
+     */
+    hideKidHandGuide() {
+      if (!this.kidHandGuide) return;
+      this.kidHandGuide.classList.add('hidden');
+      this.kidHandGuide.classList.remove('gesture-tap', 'gesture-drag', 'gesture-scrub');
+    },
+
+    /**
+     * Pianifica il ricalcolo della posizione della manina guida al prossimo frame di layout.
+     */
+    scheduleHandGuideUpdate() {
+      if (this.handGuideRaf) {
+        cancelAnimationFrame(this.handGuideRaf);
+      }
+      this.handGuideRaf = requestAnimationFrame(() => {
+        this.updateKidHandGuide();
+      });
+    },
+
+    /**
+     * Restituisce le coordinate (x, y, width, height, left, right) di un elemento rispetto a #game-stage.
+     */
+    getStageRelativeBox(el) {
+      if (!el || !this.gameStage) return null;
+      const stageRect = this.gameStage.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) return null;
+
+      return {
+        cx: rect.left - stageRect.left + rect.width * 0.5,
+        cy: rect.top - stageRect.top + rect.height * 0.5,
+        left: rect.left - stageRect.left,
+        right: rect.right - stageRect.left,
+        top: rect.top - stageRect.top,
+        bottom: rect.bottom - stageRect.top,
+        width: rect.width,
+        height: rect.height
+      };
+    },
+
+    /**
+     * Posiziona e anima la manina da bimbo (#kid-hand-guide) per mostrare visivamente
+     * ai bambini in età prescolare quale gesto compiere (toccare, trascinare o strofinare la malta).
+     */
+    updateKidHandGuide() {
+      if (!this.kidHandGuide || !this.gameStage) return;
+
+      // Se l'utente sta già trascinando o c'è una modale aperta, nascondi la manina
+      const modalOpen =
+        !this.modalVictory.classList.contains('hidden') ||
+        !this.modalConfirmReset.classList.contains('hidden');
+
+      if (this.isDraggingWood || this.isDraggingBrickTool || modalOpen) {
+        this.hideKidHandGuide();
+        return;
+      }
+
+      const hand = this.kidHandGuide;
+      hand.classList.remove('gesture-tap', 'gesture-drag', 'gesture-scrub');
+
+      if (this.currentScreen === 'menu') {
+        const targetBtn = !this.btnContinueGame.classList.contains('hidden')
+          ? this.btnContinueGame
+          : this.btnNewGame;
+        const box = this.getStageRelativeBox(targetBtn);
+        if (!box) {
+          this.hideKidHandGuide();
+          return;
+        }
+        hand.style.setProperty('--hand-start-x', `${Math.round(box.cx + 35)}px`);
+        hand.style.setProperty('--hand-start-y', `${Math.round(box.cy + 10)}px`);
+        hand.classList.remove('hidden');
+        hand.classList.add('gesture-tap');
+        return;
+      }
+
+      if (this.currentScreen === 'map') {
+        const straw = this.state.houses.straw;
+        const wood = this.state.houses.wood;
+        const brick = this.state.houses.brick;
+
+        let targetBtn = this.btnPlayStraw;
+        if (straw.completed && wood.unlocked && !wood.completed) {
+          targetBtn = this.btnPlayWood;
+        } else if (wood.completed && brick.unlocked && !brick.completed) {
+          targetBtn = this.btnPlayBrick;
+        }
+
+        const box = this.getStageRelativeBox(targetBtn);
+        if (!box) {
+          this.hideKidHandGuide();
+          return;
+        }
+        hand.style.setProperty('--hand-start-x', `${Math.round(box.cx)}px`);
+        hand.style.setProperty('--hand-start-y', `${Math.round(box.cy)}px`);
+        hand.classList.remove('hidden');
+        hand.classList.add('gesture-tap');
+        return;
+      }
+
+      if (this.currentScreen === 'builder' && this.activeHouseKey) {
+        const houseKey = this.activeHouseKey;
+        const houseState = this.state.houses[houseKey];
+        const cfg = global.HOUSES_CONFIG[houseKey];
+        if (!houseState || houseState.currentStep >= houseState.maxSteps) {
+          this.hideKidHandGuide();
+          return;
+        }
+
+        // 1. Casa di Paglia: mostra il tocco sul mucchio di paglia
+        if (houseKey === 'straw') {
+          const box = this.getStageRelativeBox(this.btnStrawPile);
+          if (!box) {
+            this.hideKidHandGuide();
+            return;
+          }
+          hand.style.setProperty('--hand-start-x', `${Math.round(box.cx)}px`);
+          hand.style.setProperty('--hand-start-y', `${Math.round(box.cy)}px`);
+          hand.classList.remove('hidden');
+          hand.classList.add('gesture-tap');
+          return;
+        }
+
+        // 2. Casa di Legno: mostra il trascinamento dal pezzo di legna al riquadro verde sulla casa
+        if (houseKey === 'wood') {
+          const fromBox = this.getStageRelativeBox(this.draggableWoodPiece);
+          const toBox = this.getStageRelativeBox(this.woodActiveTarget);
+          if (!fromBox || !toBox) {
+            this.hideKidHandGuide();
+            return;
+          }
+          hand.style.setProperty('--hand-start-x', `${Math.round(fromBox.cx)}px`);
+          hand.style.setProperty('--hand-start-y', `${Math.round(fromBox.cy)}px`);
+          hand.style.setProperty('--hand-end-x', `${Math.round(toBox.cx)}px`);
+          hand.style.setProperty('--hand-end-y', `${Math.round(toBox.cy)}px`);
+          hand.classList.remove('hidden');
+          hand.classList.add('gesture-drag');
+          return;
+        }
+
+        // 3. Casa di Malta e Mattoni:
+        if (houseKey === 'brick') {
+          const stepInfo = cfg.stepsInfo[houseState.currentStep];
+          const toBox = this.getStageRelativeBox(this.woodActiveTarget);
+          if (!stepInfo || !toBox) {
+            this.hideKidHandGuide();
+            return;
+          }
+
+          if (stepInfo.actionType === 'mortar') {
+            // Mostra la manina che prende la cazzuola e strofina avanti e indietro lungo tutto il riquadro blu
+            const fromBox = this.getStageRelativeBox(this.draggableTrowelPiece);
+            if (!fromBox) {
+              this.hideKidHandGuide();
+              return;
+            }
+            const scrubLeft = toBox.left + toBox.width * 0.16;
+            const scrubRight = toBox.left + toBox.width * 0.84;
+            hand.style.setProperty('--hand-start-x', `${Math.round(fromBox.cx)}px`);
+            hand.style.setProperty('--hand-start-y', `${Math.round(fromBox.cy)}px`);
+            hand.style.setProperty('--hand-end-x', `${Math.round(toBox.cx)}px`);
+            hand.style.setProperty('--hand-end-y', `${Math.round(toBox.cy)}px`);
+            hand.style.setProperty('--hand-scrub-left', `${Math.round(scrubLeft)}px`);
+            hand.style.setProperty('--hand-scrub-right', `${Math.round(scrubRight)}px`);
+            hand.classList.remove('hidden');
+            hand.classList.add('gesture-scrub');
+            return;
+          } else {
+            // Mostra la manina che trascina i mattoni rossi nel riquadro verde
+            const fromBox = this.getStageRelativeBox(this.draggableBrickPiece);
+            if (!fromBox) {
+              this.hideKidHandGuide();
+              return;
+            }
+            hand.style.setProperty('--hand-start-x', `${Math.round(fromBox.cx)}px`);
+            hand.style.setProperty('--hand-start-y', `${Math.round(fromBox.cy)}px`);
+            hand.style.setProperty('--hand-end-x', `${Math.round(toBox.cx)}px`);
+            hand.style.setProperty('--hand-end-y', `${Math.round(toBox.cy)}px`);
+            hand.classList.remove('hidden');
+            hand.classList.add('gesture-drag');
+            return;
+          }
+        }
+      }
+
+      this.hideKidHandGuide();
     },
 
     /**
@@ -338,9 +632,10 @@
     },
 
     /**
-     * Cambia schermata attiva e aggiorna i pulsanti della barra superiore.
+     * Cambia schermata attiva, aggiorna la barra superiore, avvia la voce guida e posiziona la manina.
      */
     showScreen(screenName, persistScene = true) {
+      this.currentScreen = screenName;
       this.screenMenu.classList.add('hidden');
       this.screenMap.classList.add('hidden');
       this.screenBuilder.classList.add('hidden');
@@ -350,11 +645,13 @@
         this.btnHudMenu.classList.add('hidden');
         this.btnHudMap.classList.add('hidden');
         this.hudTitleBadge.textContent = '🐷 I Tre Porcellini';
+        this.speakMenuWelcome();
       } else if (screenName === 'map') {
         this.screenMap.classList.remove('hidden');
         this.btnHudMenu.classList.remove('hidden');
         this.btnHudMap.classList.add('hidden');
         this.hudTitleBadge.textContent = '🗺️ Mappa delle Casette';
+        this.speakMapWelcome();
       } else if (screenName === 'builder') {
         this.screenBuilder.classList.remove('hidden');
         this.btnHudMenu.classList.remove('hidden');
@@ -366,6 +663,8 @@
       if (persistScene && screenName !== 'menu') {
         this.state = global.SaveSystem.setScene(screenName);
       }
+
+      this.scheduleHandGuideUpdate();
     },
 
     /**
@@ -485,7 +784,7 @@
     },
 
     /**
-     * Renderizza lo stato corrente del cantiere (immagine casa, fumetto, barra, strumenti).
+     * Renderizza lo stato corrente del cantiere (immagine casa, fumetto, voce narrante, manina guida, barra, strumenti).
      */
     renderBuilderState() {
       const houseKey = this.activeHouseKey;
@@ -496,12 +795,12 @@
 
       this.mortarScrubProgress = 0;
 
-      // Aggiorna Porcellino guida
+      // Aggiorna Porcellino guida e pronuncia l'istruzione del passaggio
       this.builderPigAvatar.src = cfg.pigAvatar;
       this.builderPigName.textContent = cfg.pigName;
 
       const stepInfo = cfg.stepsInfo[step] || cfg.stepsInfo[cfg.stepsInfo.length - 1];
-      this.builderSpeechBubble.textContent = stepInfo.hint;
+      this.setSpeechAndSpeak(stepInfo.hint);
 
       // Aggiorna Progresso e Stelline
       this.builderStepCounter.textContent = `${step} / ${maxSteps}`;
@@ -583,7 +882,8 @@
             this.brickSourceSlot.classList.remove('active-slot');
             this.brickSourceSlot.classList.add('locked-slot');
 
-            this.trowelStatusText.textContent = 'Passa la cazzuola nel riquadro blu sulla casa!';
+            this.trowelStatusText.textContent =
+              'Strofina la cazzuola avanti e indietro nel riquadro blu!';
             this.brickStatusText.textContent = 'Aspetta: prima devi spargere la malta!';
           } else {
             // actionType === 'brick'
@@ -606,6 +906,8 @@
           this.brickSourceSlot.classList.remove('active-slot');
         }
       }
+
+      this.scheduleHandGuideUpdate();
     },
 
     /**
@@ -651,6 +953,7 @@
         this.isDraggingWood = true;
         this.dragPointerId = e.pointerId;
         piece.classList.add('dragging-source');
+        this.hideKidHandGuide();
 
         this.dragGhost.classList.remove('hidden');
         this.moveDragGhost(e.clientX, e.clientY);
@@ -678,6 +981,7 @@
         this.woodActiveTarget.classList.remove('drag-hover');
 
         this.evaluateWoodDrop(e.clientX, e.clientY);
+        this.scheduleHandGuideUpdate();
       };
 
       window.addEventListener('pointerup', endDrag);
@@ -694,7 +998,7 @@
 
     /**
      * Configura le interazioni per la Casa di Malta e Mattoni (Livello 3):
-     * - Cazzuola (#draggable-trowel-piece): si passa sopra il livello giusto per spargere la malta.
+     * - Cazzuola (#draggable-trowel-piece): si strofina avanti e indietro lungo il riquadro blu per spargere la malta.
      * - Mattoni (#draggable-brick-piece): si trascinano sopra il livello giusto dopo aver steso la malta.
      */
     setupBrickInteractions() {
@@ -710,8 +1014,10 @@
         const stepInfo = global.HOUSES_CONFIG.brick.stepsInfo[houseState.currentStep];
         if (stepInfo.actionType !== 'mortar') {
           global.SoundFX.gentleWrong();
-          this.builderSpeechBubble.textContent =
-            'La malta c\'è già su questo livello! Adesso prendi i MATTONI ROSSI qui sotto e posali sulla malta!';
+          this.setSpeechAndSpeak(
+            'La malta c\'è già! Adesso prendi i mattoni rossi a destra dove ti mostra la manina e portali nel riquadro verde!'
+          );
+          this.scheduleHandGuideUpdate();
           return;
         }
 
@@ -719,8 +1025,10 @@
         this.isDraggingBrickTool = true;
         this.activeBrickToolType = 'trowel';
         this.dragPointerId = e.pointerId;
+        this.wasInMortarTarget = false;
         this.lastScrubX = e.clientX;
         this.lastScrubY = e.clientY;
+        this.hideKidHandGuide();
 
         trowelEl.classList.add('dragging-source');
         this.ghostIcon.textContent = '🥄';
@@ -738,8 +1046,10 @@
         const stepInfo = global.HOUSES_CONFIG.brick.stepsInfo[houseState.currentStep];
         if (stepInfo.actionType !== 'brick') {
           global.SoundFX.gentleWrong();
-          this.builderSpeechBubble.textContent =
-            'Aspetta! Prima devi spargere la MALTA passando la CAZZUOLA sul punto giusto della casa!';
+          this.setSpeechAndSpeak(
+            'Aspetta! Prima prendi la cazzuola a sinistra dove c\'è la manina e strofinala nel riquadro blu per mettere la malta!'
+          );
+          this.scheduleHandGuideUpdate();
           return;
         }
 
@@ -747,6 +1057,7 @@
         this.isDraggingBrickTool = true;
         this.activeBrickToolType = 'brick';
         this.dragPointerId = e.pointerId;
+        this.hideKidHandGuide();
 
         brickEl.classList.add('dragging-source');
         this.ghostIcon.textContent = '🧱';
@@ -755,12 +1066,12 @@
         global.SoundFX.click();
       });
 
-      // 3. Movimento puntatore (Spalmatura malta con cazzuola oppure trasporto mattoni)
+      // 3. Movimento puntatore (Spalmatura malta con cazzuola su distanza aumentata oppure trasporto mattoni)
       window.addEventListener('pointermove', (e) => {
         if (!this.isDraggingBrickTool || e.pointerId !== this.dragPointerId) return;
         this.moveDragGhost(e.clientX, e.clientY);
 
-        const inTarget = this.isPointInElement(e.clientX, e.clientY, this.woodActiveTarget, 28);
+        const inTarget = this.isPointInElement(e.clientX, e.clientY, this.woodActiveTarget, 26);
         if (inTarget) {
           this.woodActiveTarget.classList.add('drag-hover');
         } else {
@@ -768,17 +1079,24 @@
         }
 
         // Se stiamo passando la cazzuola dentro la zona del livello giusto, stendiamo la malta!
-        if (this.activeBrickToolType === 'trowel' && inTarget) {
+        if (this.activeBrickToolType === 'trowel' && inTarget && this.wasInMortarTarget) {
           const dx = e.clientX - (this.lastScrubX ?? e.clientX);
           const dy = e.clientY - (this.lastScrubY ?? e.clientY);
-          const dist = Math.hypot(dx, dy);
+          // Premiamo soprattutto il movimento orizzontale avanti e indietro dentro il riquadro
+          const rawDist = Math.hypot(dx, dy * 0.55);
+          const effectiveDist = Math.min(rawDist, 36);
 
-          // Incrementa il progresso di stesura malta passando la cazzuola
-          if (dist > 2) {
-            this.applyMortarScrub(dist * 0.95, e.clientX, e.clientY);
+          if (effectiveDist > 1.5) {
+            const targetRect = this.woodActiveTarget.getBoundingClientRect();
+            const targetWidth = Math.max(240, targetRect.width || 320);
+            // Distanza aumentata: servono circa 3.5 passate complete avanti e indietro dentro il riquadro
+            const requiredDistancePx = targetWidth * 3.4;
+            const incrementPct = (effectiveDist / requiredDistancePx) * 100;
+            this.applyMortarScrub(incrementPct, e.clientX, e.clientY);
           }
         }
 
+        this.wasInMortarTarget = inTarget;
         this.lastScrubX = e.clientX;
         this.lastScrubY = e.clientY;
       });
@@ -802,6 +1120,8 @@
         } else if (toolType === 'brick') {
           this.evaluateBrickDrop(e.clientX, e.clientY);
         }
+
+        this.scheduleHandGuideUpdate();
       };
 
       window.addEventListener('pointerup', endBrickToolDrag);
@@ -832,7 +1152,7 @@
     },
 
     /**
-     * Incrementa la percentuale di malta stesa mentre la cazzuola passa sul livello giusto.
+     * Incrementa la percentuale di malta stesa mentre la cazzuola viene strofinata nel riquadro blu.
      */
     applyMortarScrub(amount, clientX, clientY) {
       if (this.activeHouseKey !== 'brick') return;
@@ -840,9 +1160,9 @@
       const stepInfo = global.HOUSES_CONFIG.brick.stepsInfo[houseState.currentStep];
       if (!stepInfo || stepInfo.actionType !== 'mortar') return;
 
-      const prevFloor = Math.floor(this.mortarScrubProgress / 25);
+      const prevFloor = Math.floor(this.mortarScrubProgress / 20);
       this.mortarScrubProgress = Math.min(100, this.mortarScrubProgress + amount);
-      const currFloor = Math.floor(this.mortarScrubProgress / 25);
+      const currFloor = Math.floor(this.mortarScrubProgress / 20);
 
       const pct = Math.round(this.mortarScrubProgress);
       this.mortarSpreadFill.style.width = `${pct}%`;
@@ -870,23 +1190,27 @@
 
     /**
      * Valuta il rilascio della cazzuola:
-     * - Se il bambino l'ha portata nel punto giusto (anche con un passaggio breve), completa la stesura!
-     * - Se l'ha portata a un livello sbagliato della casa, suggerisce se andare più su o più giù.
+     * Non completa più istantaneamente al semplice rilascio, ma incoraggia il bambino
+     * a strofinare la cazzuola avanti e indietro lungo il riquadro blu finché non è pieno al 100%.
      */
     evaluateTrowelRelease(clientX, clientY) {
       if (this.activeHouseKey !== 'brick') return;
       const houseState = this.state.houses.brick;
       if (houseState.currentStep >= houseState.maxSteps) return;
 
-      if (this.isPointInElement(clientX, clientY, this.woodActiveTarget, 28)) {
-        // Se il bambino ha portato o passato la cazzuola nel punto giusto, completiamo la stesura
-        this.applyMortarScrub(100, clientX, clientY);
-        return;
+      const inTarget = this.isPointInElement(clientX, clientY, this.woodActiveTarget, 28);
+
+      if (inTarget && this.mortarScrubProgress < 12) {
+        // Piccolo progresso iniziale se il bimbo ha solo appoggiato la cazzuola nel riquadro
+        this.applyMortarScrub(10, clientX, clientY);
       }
 
-      if (this.mortarScrubProgress > 0) {
-        this.builderSpeechBubble.textContent =
-          'Continua a passare la cazzuola nel riquadro blu per finire di stendere la malta!';
+      if (this.mortarScrubProgress > 0 && this.mortarScrubProgress < 100) {
+        const pct = Math.round(this.mortarScrubProgress);
+        this.trowelStatusText.textContent = `Malta al ${pct}%: strofina ancora avanti e indietro!`;
+        this.setSpeechAndSpeak(
+          'Bravo! Continua a strofinare la cazzuola avanti e indietro in tutto il riquadro blu, proprio come fa la manina, finché non è tutto pieno di malta!'
+        );
         return;
       }
 
@@ -896,14 +1220,15 @@
       }
 
       global.SoundFX.gentleWrong();
-      this.builderSpeechBubble.textContent =
-        'Porta la cazzuola sulla casa e passala nel riquadro blu per spargere la malta!';
+      this.setSpeechAndSpeak(
+        'Porta la cazzuola dentro il riquadro blu sulla casa e strofinala avanti e indietro come fa la manina!'
+      );
     },
 
     /**
      * Valuta dove il bambino ha rilasciato i mattoni:
      * - Se nel livello giusto (#wood-active-target): posa i mattoni e avanza!
-     * - Se a un livello sbagliato: dà un suggerimento.
+     * - Se a un livello sbagliato: dà un suggerimento vocale.
      */
     evaluateBrickDrop(clientX, clientY) {
       if (this.activeHouseKey !== 'brick') return;
@@ -919,17 +1244,18 @@
       }
 
       if (this.isPointInElement(clientX, clientY, this.houseCanvasBox, 0)) {
-        this.giveWrongLevelFeedback(clientY, 'i mattoni', 'verde');
+        this.giveWrongLevelFeedback(clientY, 'i mattoni rossi', 'verde');
         return;
       }
 
       global.SoundFX.gentleWrong();
-      this.builderSpeechBubble.textContent =
-        'Trascina i mattoni fin dentro il riquadro verde sopra la malta!';
+      this.setSpeechAndSpeak(
+        'Trascina i mattoni rossi fin dentro il riquadro verde sulla casa, dove ti mostra la manina!'
+      );
     },
 
     /**
-     * Messaggio di aiuto quando il bambino tocca un livello sbagliato (troppo alto o troppo basso).
+     * Messaggio vocale e visivo di aiuto quando il bambino tocca un livello sbagliato (troppo alto o troppo basso).
      */
     giveWrongLevelFeedback(clientY, itemLabel, colorName) {
       global.SoundFX.gentleWrong();
@@ -941,9 +1267,13 @@
       this.woodActiveTarget.classList.add('wrong-flash');
 
       if (clientY < targetCenterY) {
-        this.builderSpeechBubble.textContent = `Ops! Lì è troppo in ALTO! Porta ${itemLabel} più in BASSO nella zona ${colorName} illuminata!`;
+        this.setSpeechAndSpeak(
+          `Ops! Lì è troppo in alto! Porta ${itemLabel} più in basso, dentro il riquadro ${colorName} dove va la manina!`
+        );
       } else {
-        this.builderSpeechBubble.textContent = `Ops! Lì è troppo in BASSO! Porta ${itemLabel} più in ALTO nella zona ${colorName} illuminata!`;
+        this.setSpeechAndSpeak(
+          `Ops! Lì è troppo in basso! Porta ${itemLabel} più in alto, dentro il riquadro ${colorName} dove va la manina!`
+        );
       }
     },
 
@@ -996,7 +1326,7 @@
     /**
      * Valuta dove il bambino ha rilasciato la legna:
      * - Se è nel livello giusto (#wood-active-target): avanza di step!
-     * - Se è sulla casa ma a un livello sbagliato: dà un suggerimento su dove andare (più su / più giù).
+     * - Se è sulla casa ma a un livello sbagliato: dà un suggerimento vocale.
      */
     evaluateWoodDrop(clientX, clientY) {
       if (this.activeHouseKey !== 'wood') return;
@@ -1020,8 +1350,9 @@
 
       // 3. Rilasciato fuori dalla casa
       global.SoundFX.gentleWrong();
-      this.builderSpeechBubble.textContent =
-        'Trascina la legna fin dentro il riquadro verde tratteggiato sulla casa!';
+      this.setSpeechAndSpeak(
+        'Trascina la legna fin dentro il riquadro verde sulla casa, seguendo la manina!'
+      );
     },
 
     /**
@@ -1047,12 +1378,13 @@
     },
 
     /**
-     * Mostra la modale festosa di completamento casetta.
+     * Mostra la modale festosa di completamento casetta e pronuncia i complimenti.
      */
     showVictoryModal(houseKey) {
       const cfg = global.HOUSES_CONFIG[houseKey];
       const finalImg = cfg.images[cfg.images.length - 1];
       this.victoryHouseImg.src = finalImg;
+      this.hideKidHandGuide();
 
       if (houseKey === 'straw') {
         this.victoryTitle.textContent = '🎉 Casetta di Paglia Completata!';
@@ -1060,17 +1392,26 @@
           'Bravissimo! Hai costruito tutta la Casetta di Paglia e hai sbloccato la Casetta di Legno!';
         this.btnVictoryNext.classList.remove('hidden');
         this.btnVictoryNext.textContent = '🪵 Costruisci la Casetta di Legno!';
+        global.SoundFX.speak(
+          'Evviva! Siete stati bravissimi! Avete costruito tutta la Casetta di Paglia! Toccate il pulsante verde per costruire la Casetta di Legno!'
+        );
       } else if (houseKey === 'wood') {
         this.victoryTitle.textContent = '🏆 Casetta di Legno Completata!';
         this.victoryMessage.textContent =
           'Straordinario! Hai portato tutta la legna al livello giusto e hai sbloccato la Casetta di Mattoni!';
         this.btnVictoryNext.classList.remove('hidden');
         this.btnVictoryNext.textContent = '🧱 Costruisci la Casetta di Mattoni!';
+        global.SoundFX.speak(
+          'Straordinario! Avete costruito tutta la Casetta di Legno! Toccate il pulsante verde per costruire la Casetta di Malta e Mattoni!'
+        );
       } else if (houseKey === 'brick') {
         this.victoryTitle.textContent = '🏰 Casetta di Malta e Mattoni Completata!';
         this.victoryMessage.textContent =
           'Capolavoro! Hai alternato malta e mattoni costruendo tutte e tre le casette dei Porcellini!';
         this.btnVictoryNext.classList.add('hidden');
+        global.SoundFX.speak(
+          'Che capolavoro! Avete costruito la robustissima Casetta di Malta e Mattoni! I tre porcellini vi dicono grazie di cuore!'
+        );
       }
 
       this.modalVictory.classList.remove('hidden');

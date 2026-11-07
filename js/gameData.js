@@ -1,6 +1,6 @@
 /**
  * Configurazione Dati e Livelli - "I Tre Porcellini"
- * Mappa completa degli asset, testi guida per bambini e coordinate dei livelli.
+ * Pensato per bambini in età prescolare (con testi parlati semplici che fanno riferimento ai colori e alla manina guida).
  */
 (function (global) {
   const HOUSES_CONFIG = {
@@ -25,43 +25,43 @@
       ],
       stepsInfo: [
         {
-          hint: 'Ciao! Aiutami a costruire la mia casetta! Tocca il mucchio di paglia dorata!',
-          actionLabel: 'Tocca la paglia per iniziare la base!'
+          hint: 'Ciao bimbi! Aiutatemi a costruire la casetta di paglia! Toccate il cerchio giallo con la paglia dove c\'è la manina!',
+          actionLabel: 'Tocca la paglia per iniziare!'
         },
         {
-          hint: 'Evviva! Abbiamo messo il primo strato! Tocca ancora il mucchio di paglia!',
-          actionLabel: 'Rinforza la base di paglia!'
+          hint: 'Bravissimi! Toccate ancora il mucchio di paglia gialla!',
+          actionLabel: 'Aggiungi altra paglia alla base!'
         },
         {
-          hint: 'Che bella! Ora alziamo i muri di paglia: tocca ancora il mucchio!',
+          hint: 'Che bello! Toccate ancora la paglia per alzare tutti i muri!',
           actionLabel: 'Costruisci i muri di paglia!'
         },
         {
-          hint: 'I muri sono pronti! Adesso iniziamo a coprire il tetto!',
+          hint: 'I muri sono pronti! Toccate ancora il mucchio giallo per fare il tetto!',
           actionLabel: 'Metti la paglia sul tetto!'
         },
         {
-          hint: 'Continua così! Copriamo tutto il tetto con tanta paglia morbida!',
+          hint: 'Continuate così! Un altro tocco sulla paglia per coprire tutto il tetto!',
           actionLabel: 'Completa il tetto di paglia!'
         },
         {
-          hint: 'Manca il comignolo lassù in alto! Tocca il mucchio di paglia!',
-          actionLabel: 'Intreccia il comignolo di paglia!'
+          hint: 'Ora facciamo il comignolo lassù in alto! Toccate ancora la paglia!',
+          actionLabel: 'Costruisci il comignolo!'
         },
         {
-          hint: 'Ora ci serve una bella porta di legno per entrare in casa!',
+          hint: 'Adesso mettiamo una bella porta per entrare! Toccate il mucchio giallo!',
           actionLabel: 'Aggiungi la porta!'
         },
         {
-          hint: 'Mettiamo delle tendine colorate alle finestre!',
+          hint: 'Mettiamo le tendine colorate alle finestre! Toccate ancora la paglia!',
           actionLabel: 'Aggiungi le tendine!'
         },
         {
-          hint: 'Un ultimo tocco per decorare la casetta con tante belle spighe!',
-          actionLabel: 'Ultimo tocco: decora la casetta!'
+          hint: 'Ultimo tocco! Toccate la paglia per decorare tutta la casetta!',
+          actionLabel: 'Ultimo tocco!'
         },
         {
-          hint: 'Urrà! La Casetta di Paglia è finita! Sei stato bravissimo!',
+          hint: 'Evviva! Avete costruito tutta la Casetta di Paglia! Siete stati super bravi!',
           actionLabel: 'Casetta completata!'
         }
       ]
@@ -72,7 +72,7 @@
       title: 'La Casetta di Legno',
       pigName: 'Timmi (Legno)',
       pigAvatar: 'Porcellino legno.jfif',
-      mechanicLabel: 'Trascina la legna al livello giusto della casa!',
+      mechanicLabel: 'Trascina la legna dove indica la manina!',
       maxSteps: 10,
       images: [
         'Casa legno 0.jpg',
@@ -87,98 +87,93 @@
         'Casa legno 9.jpg',
         'Casa legno finale.jpg'
       ],
-      /**
-       * Ogni step (da 0 a 9) richiede di trascinare la legna nella zona/livello corrispondente
-       * per passare a step + 1. Coordinate espresse in percentuale rispetto al riquadro dell'immagine casa.
-       */
       stepsInfo: [
         {
           targetZone: { top: 63, left: 16, width: 68, height: 22 },
-          levelName: 'Livello 1: Base dei Muri (In basso)',
+          levelName: 'In basso: Base dei Muri',
           itemIcon: '🪵',
           itemLabel: 'Assi Base',
-          hint: 'Iniziamo dal basso! Trascina le assi di legno nella fascia BASSA dei muri!'
+          hint: 'Ora costruiamo la Casetta di Legno! Guardate la manina: prendete il legno marrone e portatelo in basso nel riquadro verde!'
         },
         {
           targetZone: { top: 47, left: 16, width: 68, height: 19 },
-          levelName: 'Livello 2: Metà dei Muri (Al centro)',
+          levelName: 'Al centro: Metà dei Muri',
           itemIcon: '🪵',
           itemLabel: 'Assi Centrali',
-          hint: 'Ottimo! Ora porta le assi un po\' più su, al livello MEDIO intorno alle finestre!'
+          hint: 'Bravissimi! Adesso portate il legno un po\' più su, al centro della casa vicino alle finestre!'
         },
         {
           targetZone: { top: 28, left: 20, width: 42, height: 20 },
-          levelName: 'Livello 3: Cima dei Muri (Sottotetto)',
+          levelName: 'In alto: Sottotetto',
           itemIcon: '🪵',
           itemLabel: 'Assi Alte',
-          hint: 'Saliamo ancora! Porta le assi in ALTO vicino alla finestrella del sottotetto!'
+          hint: 'Saliamo ancora! Portate il legno in alto, dove indica la manina!'
         },
         {
           targetZone: { top: 34, left: 42, width: 46, height: 21 },
-          levelName: 'Livello 4: Parte Bassa del Tetto',
+          levelName: 'Tetto in basso',
           itemIcon: '🟫',
           itemLabel: 'Scandole Basse',
-          hint: 'I muri sono finiti! Ora trascina le tegole di legno nella parte BASSA del tetto!'
+          hint: 'I muri sono pronti! Ora prendete le tegole di legno e portatele sulla parte bassa del tetto!'
         },
         {
           targetZone: { top: 14, left: 32, width: 46, height: 21 },
-          levelName: 'Livello 5: Cima del Tetto',
+          levelName: 'Cima del Tetto',
           itemIcon: '🟫',
           itemLabel: 'Scandole Alte',
-          hint: 'Quasi tutto coperto! Porta le tegole di legno fino in CIMA al tetto!'
+          hint: 'Quasi finito il tetto! Portate il legno lassù in cima al tetto!'
         },
         {
           targetZone: { top: 4, left: 50, width: 20, height: 24 },
-          levelName: 'Livello 6: Il Camino (In alto a destra)',
+          levelName: 'Il Camino in cima',
           itemIcon: '🧱',
           itemLabel: 'Camino',
-          hint: 'Adesso completiamo il CAMINO lassù in cima al tetto!'
+          hint: 'Adesso portate il pezzo lassù in alto per fare il camino che fuma!'
         },
         {
           targetZone: { top: 53, left: 26, width: 19, height: 30 },
-          levelName: 'Livello 7: La Porta d\'Ingresso',
+          levelName: 'La Porta d\'Ingresso',
           itemIcon: '🚪',
           itemLabel: 'Porta di Legno',
-          hint: 'Trascina la robusta PORTA di legno nell\'arco d\'ingresso in basso!'
+          hint: 'Prendete la porta di legno e mettetela in basso per chiudere l\'entrata!'
         },
         {
           targetZone: { top: 33, left: 28, width: 52, height: 38 },
-          levelName: 'Livello 8: Le Finestre',
+          levelName: 'Le Finestre',
           itemIcon: '🪟',
           itemLabel: 'Tendine Verdi',
-          hint: 'Che bella! Portiamo le tendine verdi a quadretti sulle FINESTRE!'
+          hint: 'Che bella! Portate le tendine verdi sulle finestre della casetta!'
         },
         {
           targetZone: { top: 64, left: 40, width: 40, height: 18 },
-          levelName: 'Livello 9: Fioriere sotto le Finestre',
+          levelName: 'I Fiori sotto le Finestre',
           itemIcon: '🌸',
           itemLabel: 'Fioriere in Legno',
-          hint: 'Aggiungiamo le FIORIERE di legno piene di fiori sotto le finestre!'
+          hint: 'Mettiamo i fiorellini colorati! Portateli sotto le finestre nel riquadro verde!'
         },
         {
           targetZone: { top: 72, left: 64, width: 22, height: 19 },
-          levelName: 'Livello 10: Catasta di Legna (In basso a destra)',
+          levelName: 'Legnaia in basso a destra',
           itemIcon: '🪵',
           itemLabel: 'Scorta di Legna',
-          hint: 'Ultimo passo! Metti la scorta di legna per l\'inverno in basso a destra accanto alla casa!'
+          hint: 'Ultimo pezzo! Portate i tronchetti di legna in basso a destra vicino al prato!'
         },
         {
           targetZone: null,
           levelName: 'Casetta di Legno Completata!',
           itemIcon: '⭐',
           itemLabel: 'Completata!',
-          hint: 'Fantastico! Hai costruito tutta la Casetta di Legno mettendo ogni pezzo al livello giusto!'
+          hint: 'Evviva! Anche la Casetta di Legno è pronta! Siete stati bravissimi!'
         }
       ]
     },
 
-    // Livello 3: Casa di Malta e Mattoni (Alternanza Cazzuola con Malta -> Posa Mattoni)
     brick: {
       key: 'brick',
       title: 'La Casetta di Mattoni',
       pigName: 'Tommy (Mattoni)',
       pigAvatar: 'Porcellino mattoni.jfif',
-      mechanicLabel: 'Alterna la malta con la cazzuola e i mattoni al livello giusto!',
+      mechanicLabel: 'Alterna la malta con la cazzuola e i mattoni!',
       comingSoon: false,
       maxSteps: 12,
       images: [
@@ -196,114 +191,109 @@
         'Casa mattoni 10.jpg',
         'Casa mattoni finale.jpg'
       ],
-      /**
-       * Ogni livello richiede due fasi:
-       * 1) actionType: 'mortar' -> Passare la cazzuola nel punto giusto per spargere la malta.
-       * 2) actionType: 'brick'  -> Portare i mattoni nel giusto livello sopra la malta.
-       */
       stepsInfo: [
         {
           actionType: 'mortar',
           courseNumber: 1,
           targetZone: { top: 73, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 1 (Base): Spargi la Malta!',
-          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 1)',
-          hint: 'Ciao! Costruiamo una casa fortissima! Prima prendi la CAZZUOLA e passala sulla base per spargere la malta!'
+          levelName: 'Livello 1: Spargi la Malta!',
+          targetBadge: '🥄 Strofina qui la Cazzuola avanti e indietro!',
+          hint: 'Costruiamo la Casetta di Mattoni! Guardate la manina: prendete la cazzuola grigia e strofinatela avanti e indietro nel riquadro blu per spargere tutta la malta!'
         },
         {
           actionType: 'brick',
           courseNumber: 1,
           targetZone: { top: 73, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 1 (Base): Posa i Mattoni!',
-          targetBadge: '🧱 Posa qui i Mattoni sopra la malta! (Livello 1)',
-          hint: 'Bravo! La malta è pronta! Ora trascina i MATTONI sul primo livello sopra la malta!'
+          levelName: 'Livello 1: Posa i Mattoni!',
+          targetBadge: '🧱 Porta qui i Mattoni rossi!',
+          hint: 'Bravo, la malta è stesa! Ora prendi i mattoni rossi qui sotto e portali nel riquadro verde!'
         },
         {
           actionType: 'mortar',
           courseNumber: 2,
           targetZone: { top: 70, left: 17, width: 66, height: 13 },
           levelName: 'Livello 2: Spargi la Malta!',
-          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 2)',
-          hint: 'Primo giro di mattoni messo! Adesso alterniamo: passa la CAZZUOLA sul secondo livello per stendere la malta!'
+          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
+          hint: 'Adesso ci vuole altra malta! Prendi la cazzuola grigia e passala tante volte avanti e indietro nel riquadro blu!'
         },
         {
           actionType: 'brick',
           courseNumber: 2,
           targetZone: { top: 70, left: 17, width: 66, height: 13 },
           levelName: 'Livello 2: Posa i Mattoni!',
-          targetBadge: '🧱 Posa qui i Mattoni! (Livello 2)',
-          hint: 'Perfetto! Ora prendi i MATTONI e portali sul secondo livello sopra la malta fresca!'
+          targetBadge: '🧱 Porta qui i Mattoni rossi!',
+          hint: 'Perfetto! Ora prendi i mattoni rossi e portali sopra la malta nel riquadro verde!'
         },
         {
           actionType: 'mortar',
           courseNumber: 3,
           targetZone: { top: 67, left: 17, width: 66, height: 13 },
           levelName: 'Livello 3: Spargi la Malta!',
-          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 3)',
-          hint: 'Il muro sale! Prendi di nuovo la CAZZUOLA e spargi la malta sul terzo livello!'
+          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
+          hint: 'Il muro cresce! Prendi ancora la cazzuola grigia e strofinala bene da un lato all\'altro nel riquadro blu!'
         },
         {
           actionType: 'brick',
           courseNumber: 3,
           targetZone: { top: 67, left: 17, width: 66, height: 13 },
           levelName: 'Livello 3: Posa i Mattoni!',
-          targetBadge: '🧱 Posa qui i Mattoni! (Livello 3)',
-          hint: 'Ottimo lavoro con la cazzuola! Ora trascina i MATTONI sul terzo livello!'
+          targetBadge: '🧱 Porta qui i Mattoni rossi!',
+          hint: 'Molto bene! Ora prendi i mattoni rossi e posali nel riquadro verde!'
         },
         {
           actionType: 'mortar',
           courseNumber: 4,
           targetZone: { top: 64, left: 17, width: 66, height: 13 },
           levelName: 'Livello 4: Spargi la Malta!',
-          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 4)',
-          hint: 'Tocca ancora alla malta! Passa la CAZZUOLA sul quarto livello dei muri!'
+          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
+          hint: 'Tocca ancora alla malta! Passa la cazzuola grigia avanti e indietro nel riquadro blu finché non è pieno!'
         },
         {
           actionType: 'brick',
           courseNumber: 4,
           targetZone: { top: 64, left: 17, width: 66, height: 13 },
           levelName: 'Livello 4: Posa i Mattoni!',
-          targetBadge: '🧱 Posa qui i Mattoni! (Livello 4)',
-          hint: 'Malta stesa! Adesso porta i MATTONI al quarto livello della casa!'
+          targetBadge: '🧱 Porta qui i Mattoni rossi!',
+          hint: 'Bravissimo! Adesso trascina i mattoni rossi nel riquadro verde!'
         },
         {
           actionType: 'mortar',
           courseNumber: 5,
           targetZone: { top: 61, left: 17, width: 66, height: 13 },
           levelName: 'Livello 5: Spargi la Malta!',
-          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 5)',
-          hint: 'Siamo quasi alle finestre! Passa la CAZZUOLA sul quinto livello per mettere la malta!'
+          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
+          hint: 'Siamo quasi alle finestre! Prendi la cazzuola grigia e strofinala avanti e indietro nel riquadro blu!'
         },
         {
           actionType: 'brick',
           courseNumber: 5,
           targetZone: { top: 61, left: 17, width: 66, height: 13 },
           levelName: 'Livello 5: Posa i Mattoni!',
-          targetBadge: '🧱 Posa qui i Mattoni! (Livello 5)',
-          hint: 'Bravissimo! Ora posa i MATTONI sul quinto livello fino al davanzale delle finestre!'
+          targetBadge: '🧱 Porta qui i Mattoni rossi!',
+          hint: 'Ottimo! Ora porta i mattoni rossi nel riquadro verde sotto le finestre!'
         },
         {
           actionType: 'mortar',
           courseNumber: 6,
           targetZone: { top: 28, left: 18, width: 64, height: 32 },
-          levelName: 'Livello 6 (Parte Alta): Spargi la Malta!',
-          targetBadge: '🥄 Passa qui la Cazzuola sui Muri Alti! (Livello 6)',
-          hint: 'La base è solidissima! Ora passa la CAZZUOLA nella parte ALTA della casa per preparare i muri superiori!'
+          levelName: 'Parte Alta: Spargi la Malta!',
+          targetBadge: '🥄 Strofina la Cazzuola in alto!',
+          hint: 'Adesso prepariamo la parte alta della casa! Prendi la cazzuola grigia e passala avanti e indietro nel riquadro blu in alto!'
         },
         {
           actionType: 'brick',
           courseNumber: 6,
           targetZone: { top: 22, left: 18, width: 64, height: 38 },
-          levelName: 'Livello 6 (Parte Alta): Posa Mattoni e Tetto!',
-          targetBadge: '🧱 Porta qui gli ultimi Mattoni e Tegole! (Livello 6)',
-          hint: 'Ultimo passo! Trascina i MATTONI nella parte ALTA per completare i muri, il tetto e le fioriere!'
+          levelName: 'Parte Alta: Posa Mattoni e Tetto!',
+          targetBadge: '🧱 Porta qui gli ultimi Mattoni!',
+          hint: 'Ultimo passo! Prendi i mattoni rossi e portali in alto nel riquadro verde per finire tutta la casa!'
         },
         {
           actionType: 'done',
           targetZone: null,
           levelName: 'Casetta di Mattoni Completata!',
           targetBadge: 'Completata!',
-          hint: 'Urrà! Hai costruito una Casetta di Malta e Mattoni super resistente! Nessun lupo potrà buttarla giù!'
+          hint: 'Urrà! Hai costruito una Casetta di Mattoni fortissima! I tre porcellini ti dicono grazie!'
         }
       ]
     }

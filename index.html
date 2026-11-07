@@ -78,6 +78,10 @@
                 </span>
               </button>
 
+              <button id="btn-menu-voice" class="voice-invite-btn" title="Ascolta la voce guida">
+                🗣️ <span>Ascolta l'invito dei Porcellini!</span>
+              </button>
+
               <div id="menu-save-summary" class="menu-save-pill">
                 Nessun salvataggio attivo
               </div>
@@ -176,7 +180,7 @@
 
           <!-- COLONNA SINISTRA: PORCELLINO GUIDA + PROGRESSO -->
           <aside class="builder-sidebar-left">
-            <div class="pig-helper-card">
+            <div class="pig-helper-card" id="pig-helper-card" title="Tocca per riascoltare la voce!">
               <div class="pig-avatar-frame">
                 <img id="builder-pig-avatar" src="Porcellino paglia.jfif" alt="Porcellino guida" />
               </div>
@@ -185,6 +189,9 @@
                 <div id="builder-speech-bubble" class="speech-bubble" aria-live="polite">
                   Tocca il mucchio di paglia per iniziare!
                 </div>
+                <button id="btn-repeat-voice" class="voice-repeat-btn" title="Riascolta cosa fare">
+                  🗣️ Ascolta cosa fare
+                </button>
               </div>
             </div>
 
@@ -370,6 +377,32 @@
           </div>
         </div>
       </section>
+
+      <!-- =========================================================
+           MANINA DA BIMBO ANIMATA (GUIDA VISIVA PER ETÀ PRESCOLARE)
+           ========================================================= -->
+      <div id="kid-hand-guide" class="kid-hand-guide hidden" aria-hidden="true">
+        <div class="kid-hand-inner">
+          <div class="kid-hand-ripple"></div>
+          <svg class="kid-hand-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Ombra morbida della manina -->
+            <ellipse cx="62" cy="108" rx="26" ry="7" fill="rgba(0,0,0,0.18)" />
+            <!-- Polsino colorato da bimbo -->
+            <rect x="40" y="84" width="42" height="22" rx="10" fill="#38bdf8" stroke="#0284c7" stroke-width="4" />
+            <circle cx="52" cy="95" r="3.5" fill="#fef08a" />
+            <circle cx="70" cy="95" r="3.5" fill="#fef08a" />
+            <!-- Palmo paffuto e ditino indice che indica -->
+            <path d="M44 86 C32 80, 26 66, 30 54 C33 46, 40 46, 44 52 L44 24 C44 14, 58 14, 58 24 L58 44 C62 40, 72 42, 72 50 C76 46, 86 48, 86 56 C90 54, 96 58, 94 68 C92 80, 84 86, 78 86 Z"
+                  fill="#fed7aa" stroke="#9a3412" stroke-width="4.5" stroke-linejoin="round" />
+            <!-- Unghietta tenera sul dito indice -->
+            <ellipse cx="51" cy="22" rx="4.5" ry="5" fill="#ffedd5" />
+            <!-- Fossette da manina di bimbo -->
+            <circle cx="56" cy="64" r="2.2" fill="#d97706" opacity="0.55" />
+            <circle cx="68" cy="66" r="2.2" fill="#d97706" opacity="0.55" />
+            <circle cx="79" cy="69" r="2.2" fill="#d97706" opacity="0.55" />
+          </svg>
+        </div>
+      </div>
 
     </main>
   </div>
