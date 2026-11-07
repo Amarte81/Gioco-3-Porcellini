@@ -27,6 +27,7 @@
       this.hudTitleBadge = document.getElementById('hud-title-badge');
       this.saveToast = document.getElementById('save-toast');
       this.btnSoundToggle = document.getElementById('btn-sound-toggle');
+      this.btnFullscreenToggle = document.getElementById('btn-fullscreen-toggle');
 
       // Schermate
       this.screenMenu = document.getElementById('screen-menu');
@@ -111,6 +112,33 @@
         const enabled = global.SoundFX.toggle();
         this.btnSoundToggle.textContent = enabled ? '🔊' : '🔇';
       });
+
+      // Schermo Intero On/Off
+      if (this.btnFullscreenToggle) {
+        this.btnFullscreenToggle.addEventListener('click', () => {
+          global.SoundFX.click();
+          this.toggleFullscreen();
+        });
+
+        // Aggiorna l'icona quando cambia lo stato di fullscreen (anche premendo ESC o F11)
+        const updateFsIcon = () => {
+          const isFs = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+          );
+          this.btnFullscreenToggle.textContent = isFs ? '🗗' : '⛶';
+          this.btnFullscreenToggle.title = isFs
+            ? 'Esci dallo Schermo Intero'
+            : 'Attiva Schermo Intero';
+        };
+
+        document.addEventListener('fullscreenchange', updateFsIcon);
+        document.addEventListener('webkitfullscreenchange', updateFsIcon);
+        document.addEventListener('mozfullscreenchange', updateFsIcon);
+        document.addEventListener('MSFullscreenChange', updateFsIcon);
+      }
 
       // Menu Principale
       this.btnNewGame.addEventListener('click', () => {
@@ -206,6 +234,43 @@
           this.renderBuilderState();
         }
       });
+    },
+
+    /**
+     * Attiva o disattiva la modalità a Schermo Intero (Fullscreen API con fallback prefissi).
+     */
+    toggleFullscreen() {
+      const doc = document;
+      const elem = doc.documentElement;
+
+      const isFs = !!(
+        doc.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      );
+
+      if (!isFs) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen().catch(() => {});
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          elem.mozRequestFullScreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        }
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) {
+          doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) {
+          doc.msExitFullscreen();
+        }
+      }
     },
 
     /**
