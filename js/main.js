@@ -338,11 +338,11 @@
       const hasSaved = global.SaveSystem.hasSavedGame();
       if (hasSaved) {
         global.SoundFX.speak(
-          'Ciao bimbi! Aiutiamo insieme i tre porcellini a costruire le loro casette! Toccate il pulsante verde dove c\'è la manina per continuare a giocare!'
+          'Ciao bimbi! Aiutiamo insieme i tre porcellini a costruire le loro casette! Toccate il pulsante dove c\'è la manina per continuare a giocare!'
         );
       } else {
         global.SoundFX.speak(
-          'Ciao bimbi! Aiutiamo insieme i tre porcellini a costruire le loro casette! Toccate il pulsante arancione dove c\'è la manina per iniziare!'
+          'Ciao bimbi! Aiutiamo insieme i tre porcellini a costruire le loro casette! Toccate il pulsante verde dove c\'è la manina per iniziare!'
         );
       }
     },

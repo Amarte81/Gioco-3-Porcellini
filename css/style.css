@@ -317,10 +317,10 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
-  border-color: #9a3412;
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  border-color: #15803d;
   color: #ffffff;
-  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
 }
 
 .btn-secondary {
@@ -515,14 +515,15 @@ html, body {
   width: 100%;
   padding: clamp(8px, 1.6cqh, 13px);
   border-radius: var(--radius-md);
-  border: 2px solid #9a3412;
+  border: 2px solid #15803d;
   border-bottom-width: 5px;
-  background: linear-gradient(180deg, #fb923c, #ea580c);
+  background: linear-gradient(180deg, #22c55e, #16a34a);
   color: #ffffff;
   font-family: inherit;
   font-size: clamp(13px, 2cqh, 18px);
   font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 6px 14px rgba(22, 163, 74, 0.3);
 }
 
 .card-play-btn:disabled {
