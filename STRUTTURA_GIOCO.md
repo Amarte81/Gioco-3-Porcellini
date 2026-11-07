@@ -56,11 +56,10 @@ Meccanica: **Drag & Drop mirato al livello giusto** della casa. Il bambino trasc
 | `9` | `Casa legno 9.jpg` | **Fioriere Finestre** (`top: 62%`, `height: 20%`) | Fioriere fiorite sotto le finestre |
 | `10` | `Casa legno finale.jpg` | **Catasta Esterna / Rifinitura** (`top: 72%`, `left: 62%`, `width: 25%`, `height: 20%`) | Casa di legno completata con legnaia esterna |
 
-### Costruzione Casa di Malta e Mattoni (Livello 3 — *Predisposto per implementazione futura*)
-Meccanica prevista: **Alternanza Malta (Cazzuola) + Mattoni (Drag & Drop al livello giusto)**:
-1. Negli **step dispari** (`0 -> 1`, `2 -> 3`, `4 -> 5`, `6 -> 7`, `8 -> 9`): il bambino prende la **cazzuola** dal secchio di malta e la strofina/passa lungo il livello corrente dei muri per stendere la malta.
-2. Negli **step pari** (`1 -> 2`, `3 -> 4`, `5 -> 6`, `7 -> 8`, `9 -> 10`): il bambino trascina i **mattoni** dal pallet al livello dove è appena stata stesa la malta.
-3. Dallo step `10` a `Casa mattoni finale.jpg`: completamento finale della casa in mattoni.
+### Costruzione Casa di Malta e Mattoni (Livello 3 — *Implementato*)
+Meccanica: **Alternanza Malta (Cazzuola) + Mattoni (Drag & Drop al livello giusto)** per 6 livelli (12 passaggi totali):
+1. Negli **step pari** (`0 -> 1`, `2 -> 3`, `4 -> 5`, `6 -> 7`, `8 -> 9`, `10 -> 11`): il bambino prende la **cazzuola** (`#draggable-trowel-piece`) e la passa lungo la zona blu del livello corrente per stendere la malta (`actionType: 'mortar'`).
+2. Negli **step dispari** (`1 -> 2`, `3 -> 4`, `5 -> 6`, `7 -> 8`, `9 -> 10`, `11 -> 12`): il bambino trascina i **mattoni** (`#draggable-brick-piece`) sul livello verde dove è appena stata stesa la malta (`actionType: 'brick'`).
 
 | Step | File Asset | Azione Richiesta per Raggiungerlo |
 | :---: | :--- | :--- |
@@ -73,9 +72,10 @@ Meccanica prevista: **Alternanza Malta (Cazzuola) + Mattoni (Drag & Drop al live
 | `6` | `Casa mattoni 6.jpg` | Trascinare i mattoni sul **Livello 3** |
 | `7` | `Casa mattoni 7.jpg` | Passare la cazzuola con malta sul **Livello 4** |
 | `8` | `Casa mattoni 8.jpg` | Trascinare i mattoni sul **Livello 4** |
-| `9` | `Casa mattoni 9.jpg` | Passare la cazzuola con malta sul **Livello 5** |
+| `9` | `Casa mattoni 9.jpg` | Passare la cazzuola con malta sul **Livello 5** (sotto le finestre) |
 | `10` | `Casa mattoni 10.jpg` | Trascinare i mattoni sul **Livello 5** |
-| `11` | `Casa mattoni finale.jpg` | Tocco finale di completamento (tetto, porta e finestre) |
+| `11` | `Casa mattoni 10.jpg` (+ malta alta) | Passare la cazzuola con malta sul **Livello 6** (muri alti) |
+| `12` | `Casa mattoni finale.jpg` | Trascinare gli ultimi mattoni e tegole sul **Livello 6** |
 
 ---
 
