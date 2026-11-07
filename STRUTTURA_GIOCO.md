@@ -123,13 +123,15 @@ I progressi vengono salvati automaticamente in `localStorage` con la chiave `tre
       "unlocked": false,
       "completed": false,
       "currentStep": 0,
-      "maxSteps": 11
+      "maxSteps": 12
     }
   },
   "wolfPhase": {
     "unlocked": false,
     "completed": false,
-    "currentStage": 0
+    "currentStage": 0,
+    "run1Completed": false,
+    "run2Completed": false
   },
   "lastUpdated": "2026-11-07T11:00:00.000Z"
 }
@@ -185,9 +187,129 @@ I progressi vengono salvati automaticamente in `localStorage` con la chiave `tre
    - A `step === 10`: ultimo click/drop per posare il tetto e passare a `Casa mattoni finale.jpg` (`step = 11`).
 3. Rimuovere il flag `comingSoon: true` da `HOUSES_CONFIG.brick` in `js/gameData.js`.
 
-### Come implementare la Seconda Parte: Interazione col Lupo (Fase 2)
-1. Quando `houses.straw.completed && houses.wood.completed && houses.brick.completed` sono tutti `true`, `SaveSystem` imposta automaticamente `wolfPhase.unlocked = true`.
-2. Aggiungere una schermata `#screen-wolf` in `index.html` e uno stato `'wolf'` in `js/main.js`:
-   - **Scena 1**: Il Lupo soffia sulla Casa di Paglia (`Casa paglia 9.jpg` -> `Casa paglia 0.jfif`) e il primo porcellino scappa nella Casa di Legno.
-   - **Scena 2**: Il Lupo soffia più forte sulla Casa di Legno (`Casa legno finale.jpg` -> `Casa legno 0.jpg`) e i due porcellini scappano nella Casa di Mattoni.
-   - **Scena 3**: Il Lupo prova a soffiare sulla Casa di Mattoni (`Casa mattoni finale.jpg`), ma la casa resiste!
+### Come implementare la Seconda Parte: Interazione col Lupo e i 2 Mini-Giochi di Fuga (Fase 2)
+
+La Fase 2 si attiva **dopo il completamento della costruzione di tutte e tre le casette** (`houses.straw.completed && houses.wood.completed && houses.brick.completed === true`). `SaveSystem` imposta automaticamente `wolfPhase.unlocked = true` e sulla Mappa o a fine Livello 3 compare il pulsante dorato per avviare la storia del Lupo.
+
+#### Flusso Narrativo della Fase 2:
+```text
+[Completate 3 Casette] 
+         │
+         ▼
+[Arriva il Lupo alla Casa di Paglia] ──(Soffio animato)──► Casa vola via
+         │
+         ▼
+[MINI-GIOCO RUN 1: Fuga alla Casa di Legno] (1 Porcellino)
+         │
+         ▼
+[Arrivo alla Casa di Legno: Salvi!] ──(Soffio forte del Lupo)──► Casa crolla
+         │
+         ▼
+[MINI-GIOCO RUN 2: Fuga alla Casa di Mattoni] (2 Porcellini per mano)
+         │
+         ▼
+[Arrivo alla Casa di Mattoni: Chiavistello Chiuso!] ──(Lupo soffia invano)──► Casa solida
+         │
+         ▼
+[Epilogo Buffo del Lupo & Grande Festa dei 3 Porcellini]
+```
+
+---
+
+## 7. Specifiche Tecniche e di Design: I 2 Mini-Giochi "Run" (Target Prescolare 3-5 Anni)
+
+### Principi Guida per l'Età Prescolare (3-5 Anni)
+1. **Nessun Game Over punitivo**: Non esiste la schermata di sconfitta o morte. Il lupo è un antagonista comico da cartone animato (non spaventoso, inciampa, tossisce col fiatone). Se il bambino sbaglia o non tocca, il gioco rallenta con una buffa scivolata/capriola (*"Oink!"*) e riparte subito.
+2. **Barra di Avanzamento Narrativa (Distanza Visuale)**:
+   - Vietati timer numerici o punteggi tipo "Score: 1500".
+   - In alto viene visualizzata una barra orizzontale illustrata con gli avatar che si muovono in tempo reale:
+     `[🐺 Lupo buffo] ────► [🐷 Porcellini] ──────────────────► [🏡 Casa d'arrivo]`
+3. **Controlli Semplici & Full-Screen Tap**:
+   - Qualsiasi punto dell'area di gioco può essere toccato/cliccato (nessun bisogno di mirare pulsanti minuscoli durante l'azione).
+   - Supporto nativo Touch e Mouse tramite `Pointer Events`.
+4. **Hitbox Generose & Finestre Temporali Ampie**:
+   - Le aree di collisione degli ostacoli sono ridotte per favorire sempre il successo del bambino.
+5. **Effetti Sonori Cartooneschi**:
+   - Generati con **Web Audio API** in `js/audio.js`: passo ritmico dei piedini (*tac-tac*), salto elastico a molla (*boing!*), sbuffi d'aria del lupo (*puff-puff*) e risatine dei maialini.
+
+---
+
+### Mini-Gioco Run 1: "Salta e Scappa alla Casa di Legno!"
+- **Personaggio Giocabile**: 1 Porcellino (Porcellino di Paglia).
+- **Inseguitore**: Il Lupo goffo che corre sullo sfondo/dietro a distanza di sicurezza.
+- **Meccanica**: **One-Tap Jump Auto-Runner**.
+  - Il porcellino corre automaticamente verso destra con scorrimento dello sfondo boschivo.
+  - **Azione Utente**: Toccando un punto qualsiasi dello schermo (o barra spaziatrice / click), il porcellino compie un salto elastico verso l'alto con effetto *"Boing!"*.
+- **Ostacoli sul Sentiero**:
+  - 3-4 ostacoli morbidi ben distanziati lungo il percorso: una pozzanghera di fango con schizzi, una zucca rotolante, una radice d'albero.
+- **Comportamento all'impatto**:
+  - Se tocca un ostacolo, il porcellino fa una buffa scivolata nel fango, emette un *"Oink!"* simpatico, si rialza da solo e riprende la corsa senza mai perdere la partita.
+  - Il lupo dietro ride o inciampa a sua volta su una pigna, mantenendo la giusta distanza comica.
+- **Traguardo**:
+  - Appare la Casa di Legno con la porta aperta; il secondo fratellino si sporge e lo accoglie a braccia aperte. La porta si chiude con un *"Toc-toc!"* e coriandoli a schermo.
+  - Salva lo stato: `wolfPhase.run1Completed = true`.
+
+---
+
+### Mini-Gioco Run 2: "Insieme alla Casa di Mattoni!"
+- **Personaggi Giocabili**: 2 Porcellini che corrono tenendosi per mano.
+- **Inseguitore**: Il Lupo trafelato che sbuffa fumo dal naso.
+- **Meccanica**: **Corsa a Spinta Ritmica (Tap-to-Run) + Scelta del Bivio + Chiavistello Finale**.
+  - **Parte 1 (Spinta e Bivio)**:
+    - I porcellini avanzano a velocità moderata.
+    - Il bambino può fare tap a ritmo continuo per farli trotterellare più allegri e veloci.
+    - A metà sentiero si presenta un **bivio illustrato** a 2 sentieri:
+      - *Sentiero Alto*: Fiorito e con mele rosse (premio visivo con stelline).
+      - *Sentiero Basso*: Con pozzanghere fangose e sterpi.
+      - Il bambino tocca semplicemente la metà alta o bassa dello schermo per imboccare la scorciatoia sicura.
+  - **Parte 2 (Finale Interattivo del Chiavistello)**:
+    - I due porcellini raggiungono il portone della Casa di Mattoni e si rifugiano dentro.
+    - Compare in primo piano un **grande chiavistello di ferro/ottone** dorato con manina lampeggiante indicatrice.
+    - Il bambino tocca/fa scorrere il chiavistello: scatta il catenaccio con un sonoro *"CLANG!"*.
+    - Il lupo arriva in corsa e sbatte il muso contro il portone chiuso a mattoni con stelle che gli girano attorno alla testa (*"BUMP!"* comico).
+  - Salva lo stato: `wolfPhase.run2Completed = true; wolfPhase.completed = true;`.
+
+---
+
+## 8. Struttura del DOM e Integrazione nel Codice per la Fase 2
+
+### Elementi DOM previsti in `index.html`:
+```html
+<!-- Schermata Avventura del Lupo & Mini-Giochi Run -->
+<section id="screen-wolf-run" class="game-screen hidden" aria-label="Fuga dal Lupo">
+  <!-- Barra di Avanzamento Distanza Narrativa -->
+  <div class="run-distance-bar" id="run-distance-bar">
+    <div class="distance-track">
+      <div class="avatar-wolf" id="avatar-wolf">🐺</div>
+      <div class="avatar-pigs" id="avatar-pigs">🐷</div>
+      <div class="avatar-house-target" id="avatar-house-target">🏡</div>
+    </div>
+  </div>
+
+  <!-- Area di Corsa a Scorrimento -->
+  <div class="run-stage" id="run-stage">
+    <div class="run-background" id="run-bg-forest"></div>
+    <div class="run-ground" id="run-ground"></div>
+    
+    <!-- Entità in gioco -->
+    <div class="runner-character" id="runner-character"></div>
+    <div class="chaser-wolf" id="chaser-wolf"></div>
+    <div class="run-obstacles-container" id="run-obstacles-container"></div>
+    
+    <!-- Overlay interattivo per Bivio o Chiavistello Finale -->
+    <div class="run-interactive-overlay hidden" id="run-interactive-overlay">
+      <!-- Pulsante Chiavistello -->
+      <button class="latch-button hidden" id="btn-lock-latch" aria-label="Chiudi il portone!">
+        🔒 Chiudi il Portone!
+      </button>
+    </div>
+  </div>
+</section>
+```
+
+### Nuove funzioni previste in `js/main.js`:
+- `startWolfPhase()`: Avvia la narrazione post-costruzione casette.
+- `initRunMiniGame(stageNumber)`: Configura `stageNumber = 1` (Paglia -> Legno, 1 maialino, salto singolo) o `stageNumber = 2` (Legno -> Mattoni, 2 maialini, bivio e chiavistello).
+- `handleRunnerTap()`: Gestisce il tocco a schermo intero (salto per Run 1, spinta/scelta per Run 2).
+- `onRunCompleted(stageNumber)`: Transizione narrativa alla casa successiva e salvataggio progressi.
+
