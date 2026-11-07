@@ -1,0 +1,1113 @@
+/* ==========================================================================
+   STILI DI GIOCO 16:9 - "I Tre Porcellini"
+   Design allegro, leggibile e accessibile per bambini
+   ========================================================================== */
+
+:root {
+  --sky-top: #7dd3fc;
+  --sky-bottom: #e0f2fe;
+  --grass-light: #86efac;
+  --grass-dark: #22c55e;
+  --wood-brown: #92400e;
+  --wood-light: #d97706;
+  --straw-gold: #facc15;
+  --straw-dark: #ca8a04;
+  --primary-orange: #f97316;
+  --primary-orange-dark: #c2410c;
+  --secondary-blue: #0284c7;
+  --secondary-blue-dark: #0369a1;
+  --card-bg: #ffffff;
+  --text-dark: #1e293b;
+  --text-muted: #475569;
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0f172a;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  color: var(--text-dark);
+}
+
+/* Contenitore esterno che centra il palco 16:9 */
+#viewport-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+}
+
+/* Palco di gioco rigorosamente in formato 16:9 */
+#game-stage {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 68%, var(--grass-light) 68%, var(--grass-dark) 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65), 0 0 0 4px rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  container-type: size;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   BARRA SUPERIORE (HUD)
+   ========================================================================== */
+#top-hud {
+  height: 9%;
+  min-height: 44px;
+  padding: 0 2.2%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.9);
+  z-index: 30;
+}
+
+.hud-left, .hud-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 24%;
+}
+
+.hud-right {
+  justify-content: flex-end;
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: clamp(12px, 1.8cqh, 17px);
+  font-weight: 800;
+  color: var(--text-dark);
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-bottom-width: 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.15s ease;
+}
+
+.hud-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.hud-btn:active {
+  transform: translateY(1px);
+  border-bottom-width: 2px;
+}
+
+.hud-btn.icon-only {
+  padding: 6px 12px;
+}
+
+.hud-badge {
+  display: inline-block;
+  padding: 5px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fef08a, #fde047);
+  border: 2px solid #eab308;
+  font-weight: 900;
+  font-size: clamp(13px, 2cqh, 19px);
+  color: #854d0e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.save-indicator {
+  font-size: clamp(11px, 1.6cqh, 15px);
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  border: 2px solid #86efac;
+  padding: 4px 12px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.save-indicator.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   SCHERMATE DI GIOCO
+   ========================================================================== */
+.game-screen {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 91%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5% 3%;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   SCHERMATA 1: MENÙ PRINCIPALE
+   ========================================================================== */
+.menu-clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.05));
+}
+
+.cloud.c1 { width: 16%; height: 8%; top: 8%; left: 6%; animation: floatCloud 18s ease-in-out infinite alternate; }
+.cloud.c2 { width: 22%; height: 10%; top: 12%; right: 8%; animation: floatCloud 22s ease-in-out infinite alternate-reverse; }
+.cloud.c3 { width: 14%; height: 7%; top: 28%; left: 18%; animation: floatCloud 15s ease-in-out infinite alternate; }
+
+@keyframes floatCloud {
+  from { transform: translateX(-15px); }
+  to { transform: translateX(20px); }
+}
+
+.menu-content {
+  position: relative;
+  z-index: 2;
+  width: 92%;
+  max-width: 1100px;
+  height: 94%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.menu-header {
+  text-align: center;
+}
+
+.menu-subtitle {
+  display: inline-block;
+  background: #ffffff;
+  color: #0284c7;
+  font-weight: 800;
+  font-size: clamp(11px, 1.8cqh, 16px);
+  padding: 3px 14px;
+  border-radius: 999px;
+  border: 2px solid #bae6fd;
+  margin-bottom: 4px;
+}
+
+.menu-title {
+  font-size: clamp(26px, 5.4cqh, 54px);
+  font-weight: 900;
+  color: #9a3412;
+  text-shadow: 0 3px 0 #ffffff, 0 6px 14px rgba(0, 0, 0, 0.15);
+  line-height: 1.05;
+}
+
+.menu-tagline {
+  font-size: clamp(13px, 2.2cqh, 21px);
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-top: 2px;
+}
+
+.menu-main-card {
+  width: 100%;
+  height: 75%;
+  background: rgba(255, 255, 255, 0.94);
+  border: 4px solid #ffffff;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.16);
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 3%;
+  padding: 2.2%;
+  align-items: center;
+}
+
+.menu-hero-image-wrap {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 3px solid #fde047;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2%;
+}
+
+.menu-hero-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.35s ease;
+}
+
+.menu-hero-image-wrap:hover .menu-hero-img {
+  transform: scale(1.03);
+}
+
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(10px, 2.4cqh, 20px);
+}
+
+.big-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: clamp(10px, 2cqh, 18px) clamp(14px, 2.2cqw, 24px);
+  border-radius: var(--radius-lg);
+  border: 3px solid transparent;
+  border-bottom-width: 7px;
+  font-family: inherit;
+  font-size: clamp(15px, 2.4cqh, 22px);
+  font-weight: 900;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+.big-btn:hover {
+  transform: translateY(-3px) scale(1.01);
+  filter: brightness(1.04);
+}
+
+.big-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 3px;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+  border-color: #9a3412;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35);
+}
+
+.btn-secondary {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  border-color: #075985;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3);
+}
+
+.btn-neutral {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #94a3b8;
+  color: #334155;
+}
+
+.btn-icon {
+  font-size: clamp(22px, 3.8cqh, 36px);
+  line-height: 1;
+}
+
+.btn-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-text strong {
+  font-size: clamp(16px, 2.6cqh, 24px);
+}
+
+.btn-text small {
+  font-size: clamp(11px, 1.6cqh, 14px);
+  opacity: 0.92;
+  font-weight: 700;
+}
+
+.menu-save-pill {
+  text-align: center;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+  font-size: clamp(11px, 1.7cqh, 15px);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   SCHERMATA 2: MAPPA DELLE CASETTE
+   ========================================================================== */
+.map-header {
+  text-align: center;
+  margin-bottom: 1.5%;
+}
+
+.map-header h2 {
+  font-size: clamp(20px, 3.8cqh, 36px);
+  color: #7c2d12;
+  text-shadow: 0 2px 0 #ffffff;
+}
+
+.map-header p {
+  font-size: clamp(12px, 2cqh, 18px);
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.houses-grid {
+  width: 96%;
+  height: 80%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.2%;
+  align-items: stretch;
+}
+
+.house-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 4px solid #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 3.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.14);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.house-card.unlocked {
+  cursor: pointer;
+  border-color: #fde047;
+}
+
+.house-card.unlocked:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+}
+
+.house-card.locked, .house-card.coming-soon {
+  opacity: 0.88;
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.card-difficulty {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: clamp(11px, 1.6cqh, 14px);
+  font-weight: 900;
+}
+
+.diff-easy { background: #fef9c3; color: #854d0e; border: 2px solid #facc15; }
+.diff-medium { background: #ffedd5; color: #9a3412; border: 2px solid #fb923c; }
+.diff-hard { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
+
+.card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 44%;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px;
+}
+
+.card-img-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.card-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.68);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 6px;
+}
+
+.card-lock-overlay span {
+  font-size: clamp(24px, 4.5cqh, 42px);
+}
+
+.card-lock-overlay small {
+  font-size: clamp(11px, 1.6cqh, 14px);
+  font-weight: 700;
+}
+
+.house-card h3 {
+  font-size: clamp(15px, 2.5cqh, 23px);
+  color: var(--text-dark);
+}
+
+.card-desc {
+  font-size: clamp(11px, 1.6cqh, 14px);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.card-progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid #cbd5e1;
+}
+
+.card-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  transition: width 0.35s ease;
+}
+
+.card-status {
+  font-size: clamp(11px, 1.6cqh, 14px);
+  font-weight: 800;
+  color: #15803d;
+}
+
+.card-play-btn {
+  width: 100%;
+  padding: clamp(8px, 1.6cqh, 13px);
+  border-radius: var(--radius-md);
+  border: 2px solid #9a3412;
+  border-bottom-width: 5px;
+  background: linear-gradient(180deg, #fb923c, #ea580c);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: clamp(13px, 2cqh, 18px);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.card-play-btn:disabled {
+  background: #cbd5e1;
+  border-color: #94a3b8;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   SCHERMATA 3: CANTIERE DI COSTRUZIONE (16:9 A 3 COLONNE)
+   ========================================================================== */
+.builder-layout {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 25% 47% 25%;
+  gap: 1.5%;
+  align-items: stretch;
+}
+
+.builder-sidebar-left,
+.builder-sidebar-right {
+  background: rgba(255, 255, 255, 0.92);
+  border: 3px solid #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 4.5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Guida Porcellino a sinistra */
+.pig-helper-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pig-avatar-frame {
+  width: 72%;
+  aspect-ratio: 1 / 1;
+  max-height: 160px;
+  background: #ffffff;
+  border: 4px solid #fbbf24;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.pig-avatar-frame img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+}
+
+.pig-info {
+  width: 100%;
+  text-align: center;
+}
+
+.pig-info h3 {
+  font-size: clamp(14px, 2.2cqh, 20px);
+  color: #9a3412;
+  margin-bottom: 6px;
+}
+
+.speech-bubble {
+  position: relative;
+  background: #fef9c3;
+  border: 3px solid #facc15;
+  border-radius: var(--radius-md);
+  padding: clamp(8px, 1.6cqh, 14px);
+  font-size: clamp(12px, 1.9cqh, 16px);
+  font-weight: 800;
+  color: #713f12;
+  line-height: 1.3;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Barra progresso casetta */
+.builder-progress-panel {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(11px, 1.7cqh, 15px);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 14px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid #cbd5e1;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #facc15, #22c55e);
+  transition: width 0.35s ease;
+}
+
+.stars-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 6px;
+  font-size: clamp(12px, 1.9cqh, 17px);
+}
+
+.small-action-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  border: 2px solid #cbd5e1;
+  background: #f1f5f9;
+  color: #475569;
+  font-family: inherit;
+  font-size: clamp(11px, 1.6cqh, 14px);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.small-action-btn:hover {
+  background: #e2e8f0;
+}
+
+/* AREA CENTRALE: CANTIERE DELLA CASA */
+.builder-center-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.house-canvas-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border: 4px solid #ffffff;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#house-stage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+  pointer-events: none;
+}
+
+#house-stage-img.pop-anim {
+  animation: housePop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes housePop {
+  0% { transform: scale(0.96); }
+  55% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* OVERLAY LIVELLI CASA DI LEGNO */
+.wood-levels-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.house-band {
+  position: absolute;
+  left: 8%;
+  width: 84%;
+  border-radius: 12px;
+  pointer-events: auto;
+}
+
+.house-band.band-top { top: 4%; height: 32%; }
+.house-band.band-mid { top: 36%; height: 30%; }
+.house-band.band-low { top: 66%; height: 30%; }
+
+/* Zona target attiva del livello corrente */
+.wood-target-zone {
+  position: absolute;
+  border: 4px dashed #16a34a;
+  background: rgba(74, 222, 128, 0.24);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease, background-color 0.2s ease, transform 0.2s ease;
+  animation: pulseTargetZone 1.5s ease-in-out infinite alternate;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.45), inset 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+.wood-target-zone.drag-hover {
+  background: rgba(34, 197, 94, 0.48);
+  border-color: #15803d;
+  border-style: solid;
+  transform: scale(1.04);
+}
+
+.wood-target-zone.wrong-flash {
+  animation: attentionFlash 0.5s ease 2;
+}
+
+@keyframes pulseTargetZone {
+  from { background: rgba(74, 222, 128, 0.18); transform: scale(0.99); }
+  to { background: rgba(74, 222, 128, 0.36); transform: scale(1.02); }
+}
+
+@keyframes attentionFlash {
+  0%, 100% { border-color: #16a34a; background: rgba(74, 222, 128, 0.28); }
+  50% { border-color: #eab308; background: rgba(250, 204, 21, 0.55); transform: scale(1.06); }
+}
+
+.target-Zone-badge {
+  background: rgba(22, 101, 52, 0.92);
+  color: #ffffff;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: clamp(11px, 1.8cqh, 16px);
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.target-arrow {
+  display: inline-block;
+  animation: bounceArrow 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes bounceArrow {
+  from { transform: translateY(-3px); }
+  to { transform: translateY(3px); }
+}
+
+/* COLONNA DESTRA: STRUMENTI */
+.tool-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.tool-instruction-banner {
+  width: 100%;
+  background: #fef08a;
+  border: 2px solid #eab308;
+  color: #854d0e;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  font-size: clamp(12px, 1.8cqh, 16px);
+}
+
+.tool-instruction-banner.wood-banner {
+  background: #ffedd5;
+  border-color: #f97316;
+  color: #9a3412;
+}
+
+/* MUCCHIO DI PAGLIA CLICCABILE */
+.straw-pile-interactive {
+  width: 92%;
+  aspect-ratio: 1 / 1;
+  max-height: 250px;
+  background: radial-gradient(circle at 50% 35%, #fef08a 0%, #facc15 65%, #eab308 100%);
+  border: 5px solid #ca8a04;
+  border-bottom-width: 10px;
+  border-radius: 50% 50% 42% 42%;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 28px rgba(202, 138, 4, 0.35);
+  transition: transform 0.14s ease, filter 0.14s ease;
+  animation: strawPulse 2s ease-in-out infinite;
+}
+
+.straw-pile-interactive:hover {
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}
+
+.straw-pile-interactive:active {
+  transform: scale(0.94) translateY(4px);
+  border-bottom-width: 5px;
+}
+
+@keyframes strawPulse {
+  0%, 100% { box-shadow: 0 14px 28px rgba(202, 138, 4, 0.35), 0 0 0 0 rgba(250, 204, 21, 0.6); }
+  50% { box-shadow: 0 14px 28px rgba(202, 138, 4, 0.45), 0 0 0 14px rgba(250, 204, 21, 0); }
+}
+
+.straw-mound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.straw-main-icon {
+  font-size: clamp(38px, 7cqh, 64px);
+  line-height: 1;
+}
+
+.straw-pile-text {
+  font-family: inherit;
+  font-size: clamp(14px, 2.2cqh, 20px);
+  font-weight: 900;
+  color: #713f12;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.straw-bundle {
+  position: absolute;
+  font-size: clamp(20px, 3.5cqh, 32px);
+}
+.straw-bundle.b1 { top: 12%; left: 16%; transform: rotate(-25deg); }
+.straw-bundle.b2 { top: 14%; right: 16%; transform: rotate(25deg); }
+.straw-bundle.b3 { bottom: 12%; left: 20%; transform: rotate(-12deg); }
+
+.straw-sparkle {
+  position: absolute;
+  font-size: clamp(16px, 2.8cqh, 24px);
+}
+.straw-sparkle.s1 { top: 8%; right: 28%; }
+.straw-sparkle.s2 { bottom: 16%; right: 18%; }
+
+.tool-subtext {
+  font-size: clamp(11px, 1.7cqh, 15px);
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 4px;
+}
+
+/* STRUMENTO LEGNO: DRAG & DROP */
+.level-compass-card {
+  width: 100%;
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  border-radius: var(--radius-md);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compass-title {
+  font-size: clamp(10px, 1.5cqh, 13px);
+  font-weight: 700;
+  color: #166534;
+}
+
+.compass-value {
+  font-size: clamp(12px, 1.9cqh, 16px);
+  font-weight: 900;
+  color: #14532d;
+}
+
+.wood-source-slot {
+  width: 100%;
+  flex: 1;
+  max-height: 220px;
+  background: #fffbeb;
+  border: 3px dashed #d97706;
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.draggable-wood-piece {
+  width: 92%;
+  padding: clamp(10px, 2cqh, 16px);
+  background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
+  border: 3px solid #78350f;
+  border-bottom-width: 7px;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 10px 20px rgba(146, 64, 14, 0.35);
+  touch-action: none;
+  transition: transform 0.15s ease;
+}
+
+.draggable-wood-piece:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+
+.draggable-wood-piece:active {
+  cursor: grabbing;
+}
+
+.draggable-wood-piece.dragging-source {
+  opacity: 0.35;
+  transform: scale(0.95);
+}
+
+.wood-plank-visual {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wood-piece-icon {
+  font-size: clamp(26px, 4.2cqh, 38px);
+}
+
+.wood-plank-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plank-bar {
+  width: clamp(45px, 6cqw, 75px);
+  height: 7px;
+  background: #fde68a;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+
+.wood-piece-label {
+  font-size: clamp(12px, 1.9cqh, 17px);
+  font-weight: 900;
+}
+
+.wood-pile-base {
+  font-size: clamp(11px, 1.6cqh, 14px);
+  font-weight: 800;
+  color: #92400e;
+}
+
+/* GHOST FLOTTANTE DURANTE IL DRAG */
+.drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  padding: 12px 22px;
+  background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+  border: 3px solid #ffffff;
+  border-radius: 16px;
+  color: #ffffff;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%) rotate(-4deg) scale(1.08);
+}
+
+#ghost-icon {
+  font-size: 32px;
+}
+
+/* EFFETTI PARTICELLARI NELL'AREA CASA */
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fx-particle {
+  position: absolute;
+  font-size: clamp(20px, 3.5cqh, 32px);
+  animation: particleFly 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes particleFly {
+  0% { opacity: 1; transform: translate(0, 0) scale(0.7) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.35) rotate(var(--rot)); }
+}
+
+/* ==========================================================================
+   MODALI (CONFERMA NUOVA PARTITA E VITTORIA)
+   ========================================================================== */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3%;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 560px;
+  background: #ffffff;
+  border: 5px solid #fde047;
+  border-radius: var(--radius-xl);
+  padding: 3.5%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: housePop 0.35s ease;
+}
+
+.modal-emoji, .victory-confetti {
+  font-size: clamp(26px, 4.5cqh, 42px);
+}
+
+.modal-card h2 {
+  font-size: clamp(20px, 3.6cqh, 32px);
+  color: #9a3412;
+}
+
+.modal-card p {
+  font-size: clamp(13px, 2cqh, 18px);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.victory-preview-wrap {
+  width: 68%;
+  max-height: 190px;
+  aspect-ratio: 4 / 3;
+  border: 3px solid #86efac;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #ffffff;
+  padding: 4px;
+}
+
+.victory-preview-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.modal-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.modal-buttons .big-btn {
+  justify-content: center;
+  text-align: center;
+  padding: 10px 16px;
+}

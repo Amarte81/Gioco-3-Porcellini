@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>I Tre Porcellini - Costruiamo le Casette!</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Contenitore 16:9 centrato e scalabile automaticamente -->
+  <div id="viewport-wrapper">
+    <main id="game-stage" aria-label="Gioco I Tre Porcellini in formato 16:9">
+
+      <!-- BARRA SUPERIORE (HUD Globale) -->
+      <header id="top-hud">
+        <div class="hud-left">
+          <button id="btn-hud-menu" class="hud-btn hidden" title="Torna al Menù Principale">
+            🏠 <span>Menù</span>
+          </button>
+          <button id="btn-hud-map" class="hud-btn hidden" title="Torna alla Mappa delle Casette">
+            🗺️ <span>Casette</span>
+          </button>
+        </div>
+
+        <div class="hud-center">
+          <span id="hud-title-badge" class="hud-badge">🐷 I Tre Porcellini</span>
+        </div>
+
+        <div class="hud-right">
+          <div id="save-toast" class="save-indicator" aria-live="polite">
+            💾 Salvato
+          </div>
+          <button id="btn-sound-toggle" class="hud-btn icon-only" title="Attiva/Disattiva Suoni" aria-label="Suoni">
+            🔊
+          </button>
+        </div>
+      </header>
+
+      <!-- =========================================================
+           SCHERMATA 1: MENÙ PRINCIPALE
+           ========================================================= -->
+      <section id="screen-menu" class="game-screen active">
+        <div class="menu-clouds" aria-hidden="true">
+          <div class="cloud c1"></div>
+          <div class="cloud c2"></div>
+          <div class="cloud c3"></div>
+        </div>
+
+        <div class="menu-content">
+          <div class="menu-header">
+            <span class="menu-subtitle">Gioco Educativo per Bambini</span>
+            <h1 class="menu-title">I Tre Porcellini</h1>
+            <p class="menu-tagline">Costruiamo insieme le tre casette!</p>
+          </div>
+
+          <div class="menu-main-card">
+            <div class="menu-hero-image-wrap">
+              <img src="Porcellini uniti.jfif" alt="I Tre Porcellini con cazzuola, paglia e legna" class="menu-hero-img" />
+            </div>
+
+            <div class="menu-actions">
+              <button id="btn-new-game" class="big-btn btn-primary">
+                <span class="btn-icon">🌟</span>
+                <span class="btn-text">
+                  <strong>Nuova Partita</strong>
+                  <small>Inizia da capo l'avventura</small>
+                </span>
+              </button>
+
+              <button id="btn-continue-game" class="big-btn btn-secondary hidden">
+                <span class="btn-icon">▶️</span>
+                <span class="btn-text">
+                  <strong>Continua Partita</strong>
+                  <small id="continue-progress-label">Riprendi dai tuoi progressi</small>
+                </span>
+              </button>
+
+              <div id="menu-save-summary" class="menu-save-pill">
+                Nessun salvataggio attivo
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modale conferma Nuova Partita quando esiste già un salvataggio -->
+        <div id="modal-confirm-reset" class="modal-overlay hidden" role="dialog" aria-modal="true">
+          <div class="modal-card">
+            <div class="modal-emoji">🐷❓</div>
+            <h2>Vuoi iniziare una Nuova Partita?</h2>
+            <p>Le casette che hai già costruito torneranno all'inizio per fartele costruire di nuovo!</p>
+            <div class="modal-buttons">
+              <button id="btn-confirm-reset-yes" class="big-btn btn-primary">
+                ✅ Sì, Nuova Partita!
+              </button>
+              <button id="btn-confirm-reset-no" class="big-btn btn-neutral">
+                ↩️ No, torna indietro
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SCHERMATA 2: MAPPA DELLE CASETTE (SELEZIONE LIVELLO)
+           ========================================================= -->
+      <section id="screen-map" class="game-screen hidden">
+        <div class="map-header">
+          <h2>Scegli quale Casetta costruire!</h2>
+          <p>Costruisci le casette in ordine, dalla più facile alla più impegnativa!</p>
+        </div>
+
+        <div class="houses-grid">
+          <!-- CARD 1: CASA DI PAGLIA -->
+          <article id="card-house-straw" class="house-card unlocked" data-house="straw">
+            <div class="card-difficulty diff-easy">⭐ Facile</div>
+            <div class="card-img-wrap">
+              <img id="map-img-straw" src="Porcellino paglia.jfif" alt="Porcellino della Casa di Paglia" />
+            </div>
+            <h3>1. Casetta di Paglia</h3>
+            <p class="card-desc">Tocca il mucchio di paglia per costruire!</p>
+            <div class="card-progress-bar">
+              <div id="map-bar-straw" class="card-progress-fill" style="width: 0%"></div>
+            </div>
+            <span id="map-status-straw" class="card-status">0 / 9 passaggi</span>
+            <button id="btn-play-straw" class="card-play-btn">🌾 Costruisci!</button>
+          </article>
+
+          <!-- CARD 2: CASA DI LEGNO -->
+          <article id="card-house-wood" class="house-card locked" data-house="wood">
+            <div class="card-difficulty diff-medium">⭐⭐ Media</div>
+            <div class="card-img-wrap">
+              <img id="map-img-wood" src="Porcellino legno.jfif" alt="Porcellino della Casa di Legno" />
+              <div id="lock-overlay-wood" class="card-lock-overlay">
+                <span>🔒</span>
+                <small>Completa prima la Casetta di Paglia!</small>
+              </div>
+            </div>
+            <h3>2. Casetta di Legno</h3>
+            <p class="card-desc">Trascina la legna al giusto livello della casa!</p>
+            <div class="card-progress-bar">
+              <div id="map-bar-wood" class="card-progress-fill" style="width: 0%"></div>
+            </div>
+            <span id="map-status-wood" class="card-status">0 / 10 passaggi</span>
+            <button id="btn-play-wood" class="card-play-btn" disabled>🪵 Costruisci!</button>
+          </article>
+
+          <!-- CARD 3: CASA DI MATTONI (PROSSIMAMENTE) -->
+          <article id="card-house-brick" class="house-card coming-soon" data-house="brick">
+            <div class="card-difficulty diff-hard">⭐⭐⭐ Difficile</div>
+            <div class="card-img-wrap">
+              <img id="map-img-brick" src="Porcellino mattoni.jfif" alt="Porcellino della Casa di Mattoni" />
+              <div class="card-lock-overlay coming-soon-overlay">
+                <span>🚧</span>
+                <small>In arrivo nella prossima parte!</small>
+              </div>
+            </div>
+            <h3>3. Casetta di Mattoni</h3>
+            <p class="card-desc">Spargi la malta con la cazzuola e posa i mattoni!</p>
+            <div class="card-progress-bar">
+              <div class="card-progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="card-status">Prossimamente</span>
+            <button class="card-play-btn" disabled>🧱 Prossimamente</button>
+          </article>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SCHERMATA 3: CANTIERE DI COSTRUZIONE (PAGLIA E LEGNO)
+           ========================================================= -->
+      <section id="screen-builder" class="game-screen hidden">
+        <div class="builder-layout">
+
+          <!-- COLONNA SINISTRA: PORCELLINO GUIDA + PROGRESSO -->
+          <aside class="builder-sidebar-left">
+            <div class="pig-helper-card">
+              <div class="pig-avatar-frame">
+                <img id="builder-pig-avatar" src="Porcellino paglia.jfif" alt="Porcellino guida" />
+              </div>
+              <div class="pig-info">
+                <h3 id="builder-pig-name">Gimmi (Paglia)</h3>
+                <div id="builder-speech-bubble" class="speech-bubble" aria-live="polite">
+                  Tocca il mucchio di paglia per iniziare!
+                </div>
+              </div>
+            </div>
+
+            <div class="builder-progress-panel">
+              <div class="progress-header">
+                <span>Progresso Casetta</span>
+                <strong id="builder-step-counter">0 / 9</strong>
+              </div>
+              <div class="progress-track">
+                <div id="builder-progress-fill" class="progress-fill" style="width: 0%"></div>
+              </div>
+              <div id="builder-stars-row" class="stars-row" aria-hidden="true"></div>
+            </div>
+
+            <button id="btn-restart-house" class="small-action-btn" title="Ricomincia questa casetta da zero">
+              🔄 Ricomincia Casetta
+            </button>
+          </aside>
+
+          <!-- AREA CENTRALE: LA CASETTA E I SUOI LIVELLI -->
+          <div class="builder-center-stage">
+            <div id="house-canvas-box" class="house-canvas-box">
+              <img id="house-stage-img" src="Casa paglia 0.jfif" alt="Casetta in costruzione" draggable="false" />
+
+              <!-- Overlay dei livelli per la Casa di Legno -->
+              <div id="wood-levels-overlay" class="wood-levels-overlay hidden">
+                <!-- Fasce di riferimento per rilevare rilascio al livello sbagliato -->
+                <div class="house-band band-top" data-band="top" title="Livello Alto / Tetto"></div>
+                <div class="house-band band-mid" data-band="mid" title="Livello Medio"></div>
+                <div class="house-band band-low" data-band="low" title="Livello Basso"></div>
+
+                <!-- Zona Target attiva del livello corrente -->
+                <div id="wood-active-target" class="wood-target-zone">
+                  <div class="target-Zone-badge">
+                    <span class="target-arrow">⬇</span>
+                    <span id="wood-target-label">Porta la legna qui!</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contenitore per effetti particellari / scintille -->
+              <div id="fx-layer" class="fx-layer" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <!-- COLONNA DESTRA: STRUMENTI E MATERIALI INTERATTIVI -->
+          <aside class="builder-sidebar-right">
+
+            <!-- STRUMENTO 1: MUCCHIO DI PAGLIA (CLICK / TAP) -->
+            <div id="tool-panel-straw" class="tool-panel">
+              <div class="tool-instruction-banner">
+                👆 <strong>Tocca o Clicca</strong> il mucchio di paglia!
+              </div>
+
+              <button id="btn-straw-pile" class="straw-pile-interactive" aria-label="Mucchio di paglia: clicca per costruire">
+                <div class="straw-pile-graphic">
+                  <div class="straw-bundle b1">🌾</div>
+                  <div class="straw-bundle b2">🌾</div>
+                  <div class="straw-bundle b3">🌾</div>
+                  <div class="straw-mound">
+                    <span class="straw-sparkle s1">✨</span>
+                    <span class="straw-sparkle s2">✨</span>
+                    <span class="straw-main-icon">🌾</span>
+                    <span class="straw-pile-text">TOC-TOC!<br/>Prendi Paglia</span>
+                  </div>
+                </div>
+              </button>
+
+              <p id="straw-action-subtext" class="tool-subtext">
+                Ogni tocco aggiunge paglia alla casetta!
+              </p>
+            </div>
+
+            <!-- STRUMENTO 2: CATASTA DI LEGNA (DRAG & DROP AL LIVELLO GIUSTO) -->
+            <div id="tool-panel-wood" class="tool-panel hidden">
+              <div class="tool-instruction-banner wood-banner">
+                ✋ <strong>Trascina</strong> la legna al livello illuminato!
+              </div>
+
+              <!-- Indicatore visivo del livello target -->
+              <div class="level-compass-card">
+                <span class="compass-title">Livello richiesto:</span>
+                <strong id="wood-level-name-display" class="compass-value">Livello 1: Base dei Muri</strong>
+              </div>
+
+              <!-- Area sorgente del Drag & Drop -->
+              <div id="wood-source-slot" class="wood-source-slot">
+                <div id="draggable-wood-piece" class="draggable-wood-piece" role="button" tabindex="0" aria-label="Trascina le assi di legno sulla casa">
+                  <div class="wood-plank-visual">
+                    <span id="wood-piece-icon" class="wood-piece-icon">🪵</span>
+                    <div class="wood-plank-bars">
+                      <span class="plank-bar"></span>
+                      <span class="plank-bar"></span>
+                      <span class="plank-bar"></span>
+                    </div>
+                  </div>
+                  <span id="wood-piece-label" class="wood-piece-label">Trascinami sulla casa!</span>
+                </div>
+
+                <div class="wood-pile-base" aria-hidden="true">
+                  🪵🪵🪵 Catasta di Legna 🪵🪵🪵
+                </div>
+              </div>
+
+              <p id="wood-feedback-msg" class="tool-subtext">
+                Tieni premuto sulla legna e portala nella zona tratteggiata della casa!
+              </p>
+            </div>
+
+          </aside>
+        </div>
+
+        <!-- MODALE DI VITTORIA FINE CASETTA -->
+        <div id="modal-victory" class="modal-overlay hidden" role="dialog" aria-modal="true">
+          <div class="modal-card victory-card">
+            <div class="victory-confetti" aria-hidden="true">🎉 ⭐ 🏆 ⭐ 🎉</div>
+            <h2 id="victory-title">Casetta Completata!</h2>
+            <p id="victory-message">Sei stato bravissimo! La casetta è pronta e salvata!</p>
+            <div class="victory-preview-wrap">
+              <img id="victory-house-img" src="Casa paglia 9.jpg" alt="Casetta completata" />
+            </div>
+            <div class="modal-buttons">
+              <button id="btn-victory-next" class="big-btn btn-primary">
+                🪵 Costruisci la Casetta di Legno!
+              </button>
+              <button id="btn-victory-map" class="big-btn btn-secondary">
+                🗺️ Torna alle Casette
+              </button>
+              <button id="btn-victory-replay" class="big-btn btn-neutral">
+                🔄 Costruisci di nuovo
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Elemento clone flottante durante il trascinamento della legna -->
+  <div id="drag-ghost" class="drag-ghost hidden" aria-hidden="true">
+    <div class="wood-plank-visual">
+      <span id="ghost-icon">🪵</span>
+      <div class="wood-plank-bars">
+        <span class="plank-bar"></span>
+        <span class="plank-bar"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script del gioco (ordine: salvataggio -> audio -> dati -> logica principale) -->
+  <script src="js/saveSystem.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/gameData.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
