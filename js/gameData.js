@@ -172,15 +172,15 @@
       ]
     },
 
-    // Predisposto per la fase successiva (non attiva in questa release)
+    // Livello 3: Casa di Malta e Mattoni (Alternanza Cazzuola con Malta -> Posa Mattoni)
     brick: {
       key: 'brick',
       title: 'La Casetta di Mattoni',
       pigName: 'Tommy (Mattoni)',
       pigAvatar: 'Porcellino mattoni.jfif',
       mechanicLabel: 'Alterna la malta con la cazzuola e i mattoni al livello giusto!',
-      comingSoon: true,
-      maxSteps: 11,
+      comingSoon: false,
+      maxSteps: 12,
       images: [
         'Casa mattoni 0.jpg',
         'Casa mattoni 1.jpg',
@@ -193,7 +193,118 @@
         'Casa mattoni 8.jpg',
         'Casa mattoni 9.jpg',
         'Casa mattoni 10.jpg',
+        'Casa mattoni 10.jpg',
         'Casa mattoni finale.jpg'
+      ],
+      /**
+       * Ogni livello richiede due fasi:
+       * 1) actionType: 'mortar' -> Passare la cazzuola nel punto giusto per spargere la malta.
+       * 2) actionType: 'brick'  -> Portare i mattoni nel giusto livello sopra la malta.
+       */
+      stepsInfo: [
+        {
+          actionType: 'mortar',
+          courseNumber: 1,
+          targetZone: { top: 73, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 1 (Base): Spargi la Malta!',
+          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 1)',
+          hint: 'Ciao! Costruiamo una casa fortissima! Prima prendi la CAZZUOLA e passala sulla base per spargere la malta!'
+        },
+        {
+          actionType: 'brick',
+          courseNumber: 1,
+          targetZone: { top: 73, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 1 (Base): Posa i Mattoni!',
+          targetBadge: '🧱 Posa qui i Mattoni sopra la malta! (Livello 1)',
+          hint: 'Bravo! La malta è pronta! Ora trascina i MATTONI sul primo livello sopra la malta!'
+        },
+        {
+          actionType: 'mortar',
+          courseNumber: 2,
+          targetZone: { top: 70, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 2: Spargi la Malta!',
+          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 2)',
+          hint: 'Primo giro di mattoni messo! Adesso alterniamo: passa la CAZZUOLA sul secondo livello per stendere la malta!'
+        },
+        {
+          actionType: 'brick',
+          courseNumber: 2,
+          targetZone: { top: 70, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 2: Posa i Mattoni!',
+          targetBadge: '🧱 Posa qui i Mattoni! (Livello 2)',
+          hint: 'Perfetto! Ora prendi i MATTONI e portali sul secondo livello sopra la malta fresca!'
+        },
+        {
+          actionType: 'mortar',
+          courseNumber: 3,
+          targetZone: { top: 67, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 3: Spargi la Malta!',
+          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 3)',
+          hint: 'Il muro sale! Prendi di nuovo la CAZZUOLA e spargi la malta sul terzo livello!'
+        },
+        {
+          actionType: 'brick',
+          courseNumber: 3,
+          targetZone: { top: 67, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 3: Posa i Mattoni!',
+          targetBadge: '🧱 Posa qui i Mattoni! (Livello 3)',
+          hint: 'Ottimo lavoro con la cazzuola! Ora trascina i MATTONI sul terzo livello!'
+        },
+        {
+          actionType: 'mortar',
+          courseNumber: 4,
+          targetZone: { top: 64, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 4: Spargi la Malta!',
+          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 4)',
+          hint: 'Tocca ancora alla malta! Passa la CAZZUOLA sul quarto livello dei muri!'
+        },
+        {
+          actionType: 'brick',
+          courseNumber: 4,
+          targetZone: { top: 64, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 4: Posa i Mattoni!',
+          targetBadge: '🧱 Posa qui i Mattoni! (Livello 4)',
+          hint: 'Malta stesa! Adesso porta i MATTONI al quarto livello della casa!'
+        },
+        {
+          actionType: 'mortar',
+          courseNumber: 5,
+          targetZone: { top: 61, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 5: Spargi la Malta!',
+          targetBadge: '🥄 Passa qui la Cazzuola con la Malta! (Livello 5)',
+          hint: 'Siamo quasi alle finestre! Passa la CAZZUOLA sul quinto livello per mettere la malta!'
+        },
+        {
+          actionType: 'brick',
+          courseNumber: 5,
+          targetZone: { top: 61, left: 17, width: 66, height: 13 },
+          levelName: 'Livello 5: Posa i Mattoni!',
+          targetBadge: '🧱 Posa qui i Mattoni! (Livello 5)',
+          hint: 'Bravissimo! Ora posa i MATTONI sul quinto livello fino al davanzale delle finestre!'
+        },
+        {
+          actionType: 'mortar',
+          courseNumber: 6,
+          targetZone: { top: 28, left: 18, width: 64, height: 32 },
+          levelName: 'Livello 6 (Parte Alta): Spargi la Malta!',
+          targetBadge: '🥄 Passa qui la Cazzuola sui Muri Alti! (Livello 6)',
+          hint: 'La base è solidissima! Ora passa la CAZZUOLA nella parte ALTA della casa per preparare i muri superiori!'
+        },
+        {
+          actionType: 'brick',
+          courseNumber: 6,
+          targetZone: { top: 22, left: 18, width: 64, height: 38 },
+          levelName: 'Livello 6 (Parte Alta): Posa Mattoni e Tetto!',
+          targetBadge: '🧱 Porta qui gli ultimi Mattoni e Tegole! (Livello 6)',
+          hint: 'Ultimo passo! Trascina i MATTONI nella parte ALTA per completare i muri, il tetto e le fioriere!'
+        },
+        {
+          actionType: 'done',
+          targetZone: null,
+          levelName: 'Casetta di Mattoni Completata!',
+          targetBadge: 'Completata!',
+          hint: 'Urrà! Hai costruito una Casetta di Malta e Mattoni super resistente! Nessun lupo potrà buttarla giù!'
+        }
       ]
     }
   };

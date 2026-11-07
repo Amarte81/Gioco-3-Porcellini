@@ -996,6 +996,189 @@ html, body {
   color: #92400e;
 }
 
+/* ==========================================================================
+   STRUMENTO 3: CAZZUOLA CON MALTA E MATTONI (CASA DI MATTONI)
+   ========================================================================== */
+.tool-instruction-banner.brick-banner {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+  font-size: clamp(11px, 1.65cqh, 15px);
+}
+
+.level-compass-card.brick-compass {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  padding: 6px 8px;
+}
+
+.brick-tool-slot {
+  position: relative;
+  width: 100%;
+  background: #f8fafc;
+  border: 3px dashed #94a3b8;
+  border-radius: var(--radius-lg);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.brick-tool-slot.active-slot {
+  background: #fefce8;
+  border-color: #eab308;
+  border-style: solid;
+  box-shadow: 0 6px 16px rgba(234, 179, 8, 0.25);
+}
+
+.brick-tool-slot.locked-slot {
+  opacity: 0.55;
+  background: #f1f5f9;
+}
+
+.slot-step-badge {
+  font-size: clamp(9px, 1.35cqh, 12px);
+  font-weight: 900;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.brick-tool-slot.active-slot .slot-step-badge {
+  background: #facc15;
+  color: #713f12;
+}
+
+.draggable-trowel-piece,
+.draggable-brick-piece {
+  width: 94%;
+  padding: clamp(7px, 1.5cqh, 12px);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  touch-action: none;
+  transition: transform 0.15s ease;
+}
+
+.draggable-trowel-piece {
+  background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+  border: 3px solid #334155;
+  border-bottom-width: 6px;
+  box-shadow: 0 6px 14px rgba(71, 85, 105, 0.35);
+}
+
+.draggable-brick-piece {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  border: 3px solid #7f1d1d;
+  border-bottom-width: 6px;
+  box-shadow: 0 6px 14px rgba(185, 28, 28, 0.35);
+}
+
+.draggable-trowel-piece:hover,
+.draggable-brick-piece:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.draggable-trowel-piece.dragging-source,
+.draggable-brick-piece.dragging-source {
+  opacity: 0.35;
+  transform: scale(0.95);
+}
+
+.trowel-visual,
+.brick-visual {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(22px, 3.6cqh, 32px);
+  line-height: 1;
+}
+
+.mortar-mini-progress {
+  width: 90%;
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+.mortar-mini-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #94a3b8, #38bdf8);
+  transition: width 0.1s linear;
+}
+
+.slot-sub-hint {
+  font-size: clamp(10px, 1.45cqh, 13px);
+  font-weight: 800;
+  color: #475569;
+}
+
+/* Riempimento visivo della malta dentro la zona target sulla casa */
+.mortar-spread-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mortar-spread-fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(148, 163, 184, 0.72),
+    rgba(148, 163, 184, 0.72) 12px,
+    rgba(203, 213, 225, 0.82) 12px,
+    rgba(203, 213, 225, 0.82) 24px
+  );
+  border-right: 4px solid #f8fafc;
+  transition: width 0.08s linear;
+}
+
+.wood-target-zone .target-Zone-badge {
+  position: relative;
+  z-index: 2;
+}
+
+.wood-target-zone.mortar-target-style {
+  border-color: #0284c7;
+  background: rgba(186, 230, 253, 0.28);
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.45), inset 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+.wood-target-zone.mortar-target-style .target-Zone-badge {
+  background: rgba(3, 105, 161, 0.94);
+}
+
+/* Indicatore malta stesa sui muri alti (step 11) */
+.upper-mortar-visual {
+  position: absolute;
+  top: 30%;
+  left: 20%;
+  width: 60%;
+  height: 26%;
+  background: rgba(203, 213, 225, 0.55);
+  border: 3px solid #94a3b8;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(11px, 1.7cqh, 15px);
+  font-weight: 900;
+  color: #1e293b;
+  pointer-events: none;
+}
+
 /* GHOST FLOTTANTE DURANTE IL DRAG */
 .drag-ghost {
   position: fixed;

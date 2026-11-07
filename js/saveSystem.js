@@ -27,7 +27,7 @@
           unlocked: false,
           completed: false,
           currentStep: 0,
-          maxSteps: 11
+          maxSteps: 12
         }
       },
       wolfPhase: {
@@ -52,19 +52,22 @@
         const parsed = JSON.parse(raw);
         const def = createDefaultState();
         // Merge sicuro con lo schema di default per compatibilità futura
-        return {
+        const merged = {
           ...def,
           ...parsed,
           houses: {
-            straw: { ...def.houses.straw, ...(parsed.houses && parsed.houses.straw) },
-            wood: { ...def.houses.wood, ...(parsed.houses && parsed.houses.wood) },
-            brick: { ...def.houses.brick, ...(parsed.houses && parsed.houses.brick) }
+            straw: { ...def.houses.straw, ...(parsed.houses && parsed.houses.straw), maxSteps: def.houses.straw.maxSteps },
+            wood: { ...def.houses.wood, ...(parsed.houses && parsed.houses.wood), maxSteps: def.houses.wood.maxSteps },
+            brick: { ...def.houses.brick, ...(parsed.houses && parsed.houses.brick), maxSteps: def.houses.brick.maxSteps }
           },
           wolfPhase: {
             ...def.wolfPhase,
             ...(parsed.wolfPhase || {})
           }
         };
+        if (merged.houses.straw.completed) merged.houses.wood.unlocked = true;
+        if (merged.houses.wood.completed) merged.houses.brick.unlocked = true;
+        return merged;
       } catch (err) {
         console.warn('Impossibile leggere il salvataggio dal localStorage, uso stato predefinito:', err);
         return createDefaultState();

@@ -147,23 +147,23 @@
             <button id="btn-play-wood" class="card-play-btn" disabled>🪵 Costruisci!</button>
           </article>
 
-          <!-- CARD 3: CASA DI MATTONI (PROSSIMAMENTE) -->
-          <article id="card-house-brick" class="house-card coming-soon" data-house="brick">
+          <!-- CARD 3: CASA DI MATTONI -->
+          <article id="card-house-brick" class="house-card locked" data-house="brick">
             <div class="card-difficulty diff-hard">⭐⭐⭐ Difficile</div>
             <div class="card-img-wrap">
               <img id="map-img-brick" src="Porcellino mattoni.jfif" alt="Porcellino della Casa di Mattoni" />
-              <div class="card-lock-overlay coming-soon-overlay">
-                <span>🚧</span>
-                <small>In arrivo nella prossima parte!</small>
+              <div id="lock-overlay-brick" class="card-lock-overlay">
+                <span>🔒</span>
+                <small>Completa prima la Casetta di Legno!</small>
               </div>
             </div>
             <h3>3. Casetta di Mattoni</h3>
             <p class="card-desc">Spargi la malta con la cazzuola e posa i mattoni!</p>
             <div class="card-progress-bar">
-              <div class="card-progress-fill" style="width: 0%"></div>
+              <div id="map-bar-brick" class="card-progress-fill" style="width: 0%"></div>
             </div>
-            <span class="card-status">Prossimamente</span>
-            <button class="card-play-btn" disabled>🧱 Prossimamente</button>
+            <span id="map-status-brick" class="card-status">0 / 12 passaggi</span>
+            <button id="btn-play-brick" class="card-play-btn" disabled>🧱 Costruisci!</button>
           </article>
         </div>
       </section>
@@ -209,15 +209,24 @@
             <div id="house-canvas-box" class="house-canvas-box">
               <img id="house-stage-img" src="Casa paglia 0.jfif" alt="Casetta in costruzione" draggable="false" />
 
-              <!-- Overlay dei livelli per la Casa di Legno -->
+              <!-- Overlay dei livelli per Casa di Legno e Casa di Mattoni -->
               <div id="wood-levels-overlay" class="wood-levels-overlay hidden">
                 <!-- Fasce di riferimento per rilevare rilascio al livello sbagliato -->
                 <div class="house-band band-top" data-band="top" title="Livello Alto / Tetto"></div>
                 <div class="house-band band-mid" data-band="mid" title="Livello Medio"></div>
                 <div class="house-band band-low" data-band="low" title="Livello Basso"></div>
 
+                <!-- Strato visivo malta parte alta (per lo step 11 della casa di mattoni) -->
+                <div id="upper-mortar-visual" class="upper-mortar-visual hidden" aria-hidden="true">
+                  <span>✨ Malta stesa sui muri alti! Ora posa i mattoni! ✨</span>
+                </div>
+
                 <!-- Zona Target attiva del livello corrente -->
                 <div id="wood-active-target" class="wood-target-zone">
+                  <!-- Riempimento progressivo della malta quando si passa la cazzuola -->
+                  <div id="mortar-spread-layer" class="mortar-spread-layer hidden" aria-hidden="true">
+                    <div id="mortar-spread-fill" class="mortar-spread-fill" style="width: 0%"></div>
+                  </div>
                   <div class="target-Zone-badge">
                     <span class="target-arrow">⬇</span>
                     <span id="wood-target-label">Porta la legna qui!</span>
@@ -292,6 +301,47 @@
               <p id="wood-feedback-msg" class="tool-subtext">
                 Tieni premuto sulla legna e portala nella zona tratteggiata della casa!
               </p>
+            </div>
+
+            <!-- STRUMENTO 3: CAZZUOLA CON MALTA E MATTONI (ALTERNANZA) -->
+            <div id="tool-panel-brick" class="tool-panel hidden">
+              <div class="tool-instruction-banner brick-banner">
+                🥄 <strong>1. Spargi la Malta</strong> &rarr; 🧱 <strong>2. Posa i Mattoni</strong>
+              </div>
+
+              <div class="level-compass-card brick-compass">
+                <span class="compass-title">Azione richiesta ora:</span>
+                <strong id="brick-level-name-display" class="compass-value">Livello 1: Spargi la Malta!</strong>
+              </div>
+
+              <!-- FASE A: SECCHIO DI MALTA E CAZZUOLA -->
+              <div id="trowel-source-slot" class="brick-tool-slot active-slot">
+                <div class="slot-step-badge">FASE 1: MALTA</div>
+                <div id="draggable-trowel-piece" class="draggable-trowel-piece" role="button" tabindex="0" aria-label="Prendi la cazzuola e passala sulla casa per spargere la malta">
+                  <div class="trowel-visual">
+                    <span class="trowel-icon">🥄</span>
+                    <span class="bucket-icon">🪣</span>
+                  </div>
+                  <span id="trowel-piece-label" class="wood-piece-label">Passa la Cazzuola sul muro!</span>
+                </div>
+                <div class="mortar-mini-progress">
+                  <div id="trowel-scrub-bar" class="mortar-mini-fill" style="width: 0%"></div>
+                </div>
+                <small id="trowel-status-text" class="slot-sub-hint">Strofinami sulla zona illuminata!</small>
+              </div>
+
+              <!-- FASE B: PALLET DI MATTONI -->
+              <div id="brick-source-slot" class="brick-tool-slot locked-slot">
+                <div class="slot-step-badge">FASE 2: MATTONI</div>
+                <div id="draggable-brick-piece" class="draggable-brick-piece" role="button" tabindex="0" aria-label="Trascina i mattoni sulla malta al livello giusto">
+                  <div class="brick-visual">
+                    <span class="brick-icon">🧱</span>
+                    <span class="brick-icon">🧱</span>
+                  </div>
+                  <span id="brick-piece-label" class="wood-piece-label">Porta i Mattoni al livello!</span>
+                </div>
+                <small id="brick-status-text" class="slot-sub-hint">Prima spargi la malta con la cazzuola!</small>
+              </div>
             </div>
 
           </aside>

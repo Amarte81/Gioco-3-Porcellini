@@ -79,6 +79,25 @@
       playTone(chime, 'sine', 0.18, 0.09, 0.18);
     },
 
+    /** Suono morbido quando si spalma la malta con la cazzuola */
+    mortarScrub() {
+      playTone(310 + Math.random() * 90, 'sine', 0.06, 0, 0.08);
+    },
+
+    /** Suono quando lo strato di malta è completato */
+    mortarComplete(stepIndex = 1) {
+      playTone(360, 'triangle', 0.09, 0, 0.15);
+      playTone(480 + stepIndex * 18, 'sine', 0.16, 0.06, 0.18);
+    },
+
+    /** Suono solido di posa dei mattoni sulla malta */
+    brickPlace(stepIndex = 1) {
+      playTone(150, 'triangle', 0.07, 0, 0.16);
+      playTone(210, 'square', 0.07, 0.05, 0.12);
+      const chime = 440 + stepIndex * 25;
+      playTone(chime, 'sine', 0.2, 0.1, 0.19);
+    },
+
     /** Suono delicato "boing" quando il livello non è quello giusto */
     gentleWrong() {
       playTone(280, 'sine', 0.14, 0, 0.14);

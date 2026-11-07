@@ -1,13 +1,21 @@
 /**
  * Controller Principale del Gioco - "I Tre Porcellini"
  * Gestisce il Menù Principale, la Mappa delle Casette, il Salvataggio
- * e le meccaniche progressive per Casa di Paglia (Click) e Casa di Legno (Drag & Drop al livello giusto).
+ * e le meccaniche progressive per:
+ * - Casa di Paglia (Click sul mucchio di paglia)
+ * - Casa di Legno (Drag & Drop della legna al livello giusto della casa)
+ * - Casa di Malta e Mattoni (Alternanza: spargere la malta con la cazzuola nel punto giusto -> posare i mattoni al livello giusto)
  */
 (function (global) {
   const App = {
     state: null,
     activeHouseKey: null,
     isDraggingWood: false,
+    isDraggingBrickTool: false,
+    activeBrickToolType: null, // 'trowel' | 'brick'
+    mortarScrubProgress: 0,
+    lastScrubX: null,
+    lastScrubY: null,
     dragPointerId: null,
     saveToastTimer: null,
 
@@ -46,6 +54,7 @@
       // Mappa Casette
       this.cardStraw = document.getElementById('card-house-straw');
       this.cardWood = document.getElementById('card-house-wood');
+      this.cardBrick = document.getElementById('card-house-brick');
       this.mapBarStraw = document.getElementById('map-bar-straw');
       this.mapStatusStraw = document.getElementById('map-status-straw');
       this.btnPlayStraw = document.getElementById('btn-play-straw');
@@ -53,6 +62,10 @@
       this.mapStatusWood = document.getElementById('map-status-wood');
       this.btnPlayWood = document.getElementById('btn-play-wood');
       this.lockOverlayWood = document.getElementById('lock-overlay-wood');
+      this.mapBarBrick = document.getElementById('map-bar-brick');
+      this.mapStatusBrick = document.getElementById('map-status-brick');
+      this.btnPlayBrick = document.getElementById('btn-play-brick');
+      this.lockOverlayBrick = document.getElementById('lock-overlay-brick');
 
       // Builder
       this.builderPigAvatar = document.getElementById('builder-pig-avatar');
@@ -68,6 +81,9 @@
       this.woodLevelsOverlay = document.getElementById('wood-levels-overlay');
       this.woodActiveTarget = document.getElementById('wood-active-target');
       this.woodTargetLabel = document.getElementById('wood-target-label');
+      this.mortarSpreadLayer = document.getElementById('mortar-spread-layer');
+      this.mortarSpreadFill = document.getElementById('mortar-spread-fill');
+      this.upperMortarVisual = document.getElementById('upper-mortar-visual');
       this.fxLayer = document.getElementById('fx-layer');
 
       // Strumenti Paglia e Legno
@@ -81,6 +97,20 @@
       this.woodPieceIcon = document.getElementById('wood-piece-icon');
       this.woodPieceLabel = document.getElementById('wood-piece-label');
       this.woodFeedbackMsg = document.getElementById('wood-feedback-msg');
+
+      // Strumenti Casa di Malta e Mattoni
+      this.toolPanelBrick = document.getElementById('tool-panel-brick');
+      this.brickLevelNameDisplay = document.getElementById('brick-level-name-display');
+      this.trowelSourceSlot = document.getElementById('trowel-source-slot');
+      this.draggableTrowelPiece = document.getElementById('draggable-trowel-piece');
+      this.trowelPieceLabel = document.getElementById('trowel-piece-label');
+      this.trowelScrubBar = document.getElementById('trowel-scrub-bar');
+      this.trowelStatusText = document.getElementById('trowel-status-text');
+      this.brickSourceSlot = document.getElementById('brick-source-slot');
+      this.draggableBrickPiece = document.getElementById('draggable-brick-piece');
+      this.brickPieceLabel = document.getElementById('brick-piece-label');
+      this.brickStatusText = document.getElementById('brick-status-text');
+
       this.dragGhost = document.getElementById('drag-ghost');
       this.ghostIcon = document.getElementById('ghost-icon');
 
@@ -120,7 +150,6 @@
           this.toggleFullscreen();
         });
 
-        // Aggiorna l'icona quando cambia lo stato di fullscreen (anche premendo ESC o F11)
         const updateFsIcon = () => {
           const isFs = !!(
             document.fullscreenElement ||
@@ -146,7 +175,8 @@
         const current = global.SaveSystem.load();
         const hasProgress =
           current.houses.straw.currentStep > 0 ||
-          current.houses.wood.currentStep > 0;
+          current.houses.wood.currentStep > 0 ||
+          current.houses.brick.currentStep > 0;
 
         if (hasProgress) {
           this.modalConfirmReset.classList.remove('hidden');
@@ -189,6 +219,16 @@
         this.openHouseBuilder('wood');
       });
 
+      this.cardBrick.addEventListener('click', () => {
+        this.state = global.SaveSystem.load();
+        if (!this.state.houses.brick.unlocked) {
+          global.SoundFX.gentleWrong();
+          return;
+        }
+        global.SoundFX.click();
+        this.openHouseBuilder('brick');
+      });
+
       // Ricomincia singola casetta
       this.btnRestartHouse.addEventListener('click', () => {
         if (!this.activeHouseKey) return;
@@ -203,8 +243,9 @@
         this.handleStrawClick();
       });
 
-      // Costruzione Casa di Legno: Drag & Drop unificato (Pointer Events)
+      // Costruzione Casa di Legno e Casa di Mattoni: Drag & Drop / Passaggio Cazzuola
       this.setupWoodDragAndDrop();
+      this.setupBrickInteractions();
 
       // Bottoni Modale Vittoria
       this.btnVictoryNext.addEventListener('click', () => {
@@ -212,6 +253,8 @@
         this.modalVictory.classList.add('hidden');
         if (this.activeHouseKey === 'straw') {
           this.openHouseBuilder('wood');
+        } else if (this.activeHouseKey === 'wood') {
+          this.openHouseBuilder('brick');
         } else {
           this.refreshMapUI();
           this.showScreen('map');
@@ -332,6 +375,7 @@
       this.state = global.SaveSystem.load();
       const straw = this.state.houses.straw;
       const wood = this.state.houses.wood;
+      const brick = this.state.houses.brick;
       const hasSaved = global.SaveSystem.hasSavedGame();
 
       if (hasSaved) {
@@ -342,8 +386,13 @@
           : wood.unlocked
           ? `Legno ${wood.currentStep}/${wood.maxSteps}`
           : 'Legno 🔒';
-        this.continueProgressLabel.textContent = `${strawTxt} • ${woodTxt}`;
-        this.menuSaveSummary.textContent = `💾 Progressi salvati trovati: ${strawTxt} | ${woodTxt}`;
+        const brickTxt = brick.completed
+          ? 'Mattoni ✅'
+          : brick.unlocked
+          ? `Mattoni ${brick.currentStep}/${brick.maxSteps}`
+          : 'Mattoni 🔒';
+        this.continueProgressLabel.textContent = `${strawTxt} • ${woodTxt} • ${brickTxt}`;
+        this.menuSaveSummary.textContent = `💾 Progressi salvati: ${strawTxt} | ${woodTxt} | ${brickTxt}`;
       } else {
         this.btnContinueGame.classList.add('hidden');
         this.menuSaveSummary.textContent = '✨ Inizia una Nuova Partita per costruire le casette!';
@@ -357,6 +406,7 @@
       this.state = global.SaveSystem.load();
       const straw = this.state.houses.straw;
       const wood = this.state.houses.wood;
+      const brick = this.state.houses.brick;
 
       // Card 1: Paglia
       const strawPct = Math.round((straw.currentStep / straw.maxSteps) * 100);
@@ -395,10 +445,36 @@
         this.mapStatusWood.textContent = '🔒 Completa prima la Paglia';
         this.btnPlayWood.textContent = '🔒 Bloccata';
       }
+
+      // Card 3: Malta e Mattoni
+      const brickPct = Math.round((brick.currentStep / brick.maxSteps) * 100);
+      this.mapBarBrick.style.width = `${brickPct}%`;
+
+      if (brick.unlocked) {
+        this.cardBrick.classList.remove('locked', 'coming-soon');
+        this.cardBrick.classList.add('unlocked');
+        this.lockOverlayBrick.classList.add('hidden');
+        this.btnPlayBrick.disabled = false;
+        this.mapStatusBrick.textContent = brick.completed
+          ? '✅ Completata! (12 / 12)'
+          : `${brick.currentStep} / ${brick.maxSteps} passaggi`;
+        this.btnPlayBrick.textContent = brick.completed
+          ? '🧱 Rigioca o Guarda!'
+          : brick.currentStep > 0
+          ? '🧱 Continua!'
+          : '🧱 Costruisci!';
+      } else {
+        this.cardBrick.classList.add('locked');
+        this.cardBrick.classList.remove('unlocked', 'coming-soon');
+        this.lockOverlayBrick.classList.remove('hidden');
+        this.btnPlayBrick.disabled = true;
+        this.mapStatusBrick.textContent = '🔒 Completa prima il Legno';
+        this.btnPlayBrick.textContent = '🔒 Bloccata';
+      }
     },
 
     /**
-     * Apre il cantiere di costruzione per la casa selezionata ('straw' o 'wood').
+     * Apre il cantiere di costruzione per la casa selezionata ('straw', 'wood', 'brick').
      */
     openHouseBuilder(houseKey) {
       this.activeHouseKey = houseKey;
@@ -417,6 +493,8 @@
       const houseState = this.state.houses[houseKey];
       const step = houseState.currentStep;
       const maxSteps = houseState.maxSteps;
+
+      this.mortarScrubProgress = 0;
 
       // Aggiorna Porcellino guida
       this.builderPigAvatar.src = cfg.pigAvatar;
@@ -440,17 +518,22 @@
       const imgFile = cfg.images[Math.min(step, cfg.images.length - 1)];
       this.houseStageImg.src = imgFile;
       this.houseStageImg.classList.remove('pop-anim');
-      void this.houseStageImg.offsetWidth; // trigger reflow
+      void this.houseStageImg.offsetWidth;
       this.houseStageImg.classList.add('pop-anim');
 
-      // Configura pannello strumenti specifico (Paglia vs Legno)
+      // Nascondi tutti i pannelli strumenti e attiva quello giusto
+      this.toolPanelStraw.classList.add('hidden');
+      this.toolPanelWood.classList.add('hidden');
+      this.toolPanelBrick.classList.add('hidden');
+      this.mortarSpreadLayer.classList.add('hidden');
+      this.upperMortarVisual.classList.add('hidden');
+      this.woodActiveTarget.classList.remove('mortar-target-style');
+
       if (houseKey === 'straw') {
         this.toolPanelStraw.classList.remove('hidden');
-        this.toolPanelWood.classList.add('hidden');
         this.woodLevelsOverlay.classList.add('hidden');
         this.strawActionSubtext.textContent = stepInfo.actionLabel || '';
       } else if (houseKey === 'wood') {
-        this.toolPanelStraw.classList.add('hidden');
         this.toolPanelWood.classList.remove('hidden');
 
         if (step < maxSteps && stepInfo.targetZone) {
@@ -470,6 +553,57 @@
           this.woodLevelsOverlay.classList.add('hidden');
           this.woodLevelNameDisplay.textContent = 'Casetta Completata!';
           this.draggableWoodPiece.classList.add('hidden');
+        }
+      } else if (houseKey === 'brick') {
+        this.toolPanelBrick.classList.remove('hidden');
+
+        // Se siamo allo step 11 (malta già stesa sui muri alti prima dell'ultimo step di mattoni), mostriamo l'indicatore
+        if (step === 11) {
+          this.upperMortarVisual.classList.remove('hidden');
+        }
+
+        if (step < maxSteps && stepInfo.targetZone) {
+          this.woodLevelsOverlay.classList.remove('hidden');
+          const tz = stepInfo.targetZone;
+          this.woodActiveTarget.style.top = `${tz.top}%`;
+          this.woodActiveTarget.style.left = `${tz.left}%`;
+          this.woodActiveTarget.style.width = `${tz.width}%`;
+          this.woodActiveTarget.style.height = `${tz.height}%`;
+          this.woodTargetLabel.textContent = stepInfo.targetBadge || stepInfo.levelName;
+          this.brickLevelNameDisplay.textContent = stepInfo.levelName;
+
+          if (stepInfo.actionType === 'mortar') {
+            this.woodActiveTarget.classList.add('mortar-target-style');
+            this.mortarSpreadLayer.classList.remove('hidden');
+            this.mortarSpreadFill.style.width = '0%';
+            this.trowelScrubBar.style.width = '0%';
+
+            this.trowelSourceSlot.classList.add('active-slot');
+            this.trowelSourceSlot.classList.remove('locked-slot');
+            this.brickSourceSlot.classList.remove('active-slot');
+            this.brickSourceSlot.classList.add('locked-slot');
+
+            this.trowelStatusText.textContent = 'Passa la cazzuola nel riquadro blu sulla casa!';
+            this.brickStatusText.textContent = 'Aspetta: prima devi spargere la malta!';
+          } else {
+            // actionType === 'brick'
+            this.woodActiveTarget.classList.remove('mortar-target-style');
+            this.mortarSpreadLayer.classList.add('hidden');
+            this.trowelScrubBar.style.width = '100%';
+
+            this.trowelSourceSlot.classList.remove('active-slot');
+            this.trowelSourceSlot.classList.add('locked-slot');
+            this.brickSourceSlot.classList.add('active-slot');
+            this.brickSourceSlot.classList.remove('locked-slot');
+
+            this.trowelStatusText.textContent = 'Malta stesa su questo livello! ✅';
+            this.brickStatusText.textContent = 'Ora trascina i mattoni nel riquadro verde!';
+          }
+        } else {
+          this.woodLevelsOverlay.classList.add('hidden');
+          this.brickLevelNameDisplay.textContent = 'Casetta di Mattoni Completata!';
+          this.trowelSourceSlot.classList.remove('active-slot');
+          this.brickSourceSlot.classList.remove('active-slot');
         }
       }
     },
@@ -558,6 +692,288 @@
       });
     },
 
+    /**
+     * Configura le interazioni per la Casa di Malta e Mattoni (Livello 3):
+     * - Cazzuola (#draggable-trowel-piece): si passa sopra il livello giusto per spargere la malta.
+     * - Mattoni (#draggable-brick-piece): si trascinano sopra il livello giusto dopo aver steso la malta.
+     */
+    setupBrickInteractions() {
+      const trowelEl = this.draggableTrowelPiece;
+      const brickEl = this.draggableBrickPiece;
+
+      // 1. Inizio trascinamento CAZZUOLA
+      trowelEl.addEventListener('pointerdown', (e) => {
+        if (this.activeHouseKey !== 'brick') return;
+        const houseState = this.state.houses.brick;
+        if (houseState.currentStep >= houseState.maxSteps) return;
+
+        const stepInfo = global.HOUSES_CONFIG.brick.stepsInfo[houseState.currentStep];
+        if (stepInfo.actionType !== 'mortar') {
+          global.SoundFX.gentleWrong();
+          this.builderSpeechBubble.textContent =
+            'La malta c\'è già su questo livello! Adesso prendi i MATTONI ROSSI qui sotto e posali sulla malta!';
+          return;
+        }
+
+        e.preventDefault();
+        this.isDraggingBrickTool = true;
+        this.activeBrickToolType = 'trowel';
+        this.dragPointerId = e.pointerId;
+        this.lastScrubX = e.clientX;
+        this.lastScrubY = e.clientY;
+
+        trowelEl.classList.add('dragging-source');
+        this.ghostIcon.textContent = '🥄';
+        this.dragGhost.classList.remove('hidden');
+        this.moveDragGhost(e.clientX, e.clientY);
+        global.SoundFX.click();
+      });
+
+      // 2. Inizio trascinamento MATTONI
+      brickEl.addEventListener('pointerdown', (e) => {
+        if (this.activeHouseKey !== 'brick') return;
+        const houseState = this.state.houses.brick;
+        if (houseState.currentStep >= houseState.maxSteps) return;
+
+        const stepInfo = global.HOUSES_CONFIG.brick.stepsInfo[houseState.currentStep];
+        if (stepInfo.actionType !== 'brick') {
+          global.SoundFX.gentleWrong();
+          this.builderSpeechBubble.textContent =
+            'Aspetta! Prima devi spargere la MALTA passando la CAZZUOLA sul punto giusto della casa!';
+          return;
+        }
+
+        e.preventDefault();
+        this.isDraggingBrickTool = true;
+        this.activeBrickToolType = 'brick';
+        this.dragPointerId = e.pointerId;
+
+        brickEl.classList.add('dragging-source');
+        this.ghostIcon.textContent = '🧱';
+        this.dragGhost.classList.remove('hidden');
+        this.moveDragGhost(e.clientX, e.clientY);
+        global.SoundFX.click();
+      });
+
+      // 3. Movimento puntatore (Spalmatura malta con cazzuola oppure trasporto mattoni)
+      window.addEventListener('pointermove', (e) => {
+        if (!this.isDraggingBrickTool || e.pointerId !== this.dragPointerId) return;
+        this.moveDragGhost(e.clientX, e.clientY);
+
+        const inTarget = this.isPointInElement(e.clientX, e.clientY, this.woodActiveTarget, 28);
+        if (inTarget) {
+          this.woodActiveTarget.classList.add('drag-hover');
+        } else {
+          this.woodActiveTarget.classList.remove('drag-hover');
+        }
+
+        // Se stiamo passando la cazzuola dentro la zona del livello giusto, stendiamo la malta!
+        if (this.activeBrickToolType === 'trowel' && inTarget) {
+          const dx = e.clientX - (this.lastScrubX ?? e.clientX);
+          const dy = e.clientY - (this.lastScrubY ?? e.clientY);
+          const dist = Math.hypot(dx, dy);
+
+          // Incrementa il progresso di stesura malta passando la cazzuola
+          if (dist > 2) {
+            this.applyMortarScrub(dist * 0.95, e.clientX, e.clientY);
+          }
+        }
+
+        this.lastScrubX = e.clientX;
+        this.lastScrubY = e.clientY;
+      });
+
+      // 4. Rilascio puntatore
+      const endBrickToolDrag = (e) => {
+        if (!this.isDraggingBrickTool || e.pointerId !== this.dragPointerId) return;
+        const toolType = this.activeBrickToolType;
+
+        this.isDraggingBrickTool = false;
+        this.activeBrickToolType = null;
+        this.dragPointerId = null;
+
+        trowelEl.classList.remove('dragging-source');
+        brickEl.classList.remove('dragging-source');
+        this.dragGhost.classList.add('hidden');
+        this.woodActiveTarget.classList.remove('drag-hover');
+
+        if (toolType === 'trowel') {
+          this.evaluateTrowelRelease(e.clientX, e.clientY);
+        } else if (toolType === 'brick') {
+          this.evaluateBrickDrop(e.clientX, e.clientY);
+        }
+      };
+
+      window.addEventListener('pointerup', endBrickToolDrag);
+      window.addEventListener('pointercancel', endBrickToolDrag);
+
+      // Accessibilità da tastiera
+      trowelEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const step = this.state.houses.brick.currentStep;
+          const info = global.HOUSES_CONFIG.brick.stepsInfo[step];
+          if (info && info.actionType === 'mortar') {
+            this.advanceBrickStep(50, 68, 'mortar');
+          }
+        }
+      });
+
+      brickEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const step = this.state.houses.brick.currentStep;
+          const info = global.HOUSES_CONFIG.brick.stepsInfo[step];
+          if (info && info.actionType === 'brick') {
+            this.advanceBrickStep(50, 68, 'brick');
+          }
+        }
+      });
+    },
+
+    /**
+     * Incrementa la percentuale di malta stesa mentre la cazzuola passa sul livello giusto.
+     */
+    applyMortarScrub(amount, clientX, clientY) {
+      if (this.activeHouseKey !== 'brick') return;
+      const houseState = this.state.houses.brick;
+      const stepInfo = global.HOUSES_CONFIG.brick.stepsInfo[houseState.currentStep];
+      if (!stepInfo || stepInfo.actionType !== 'mortar') return;
+
+      const prevFloor = Math.floor(this.mortarScrubProgress / 25);
+      this.mortarScrubProgress = Math.min(100, this.mortarScrubProgress + amount);
+      const currFloor = Math.floor(this.mortarScrubProgress / 25);
+
+      const pct = Math.round(this.mortarScrubProgress);
+      this.mortarSpreadFill.style.width = `${pct}%`;
+      this.trowelScrubBar.style.width = `${pct}%`;
+
+      if (currFloor > prevFloor && this.mortarScrubProgress < 100) {
+        global.SoundFX.mortarScrub();
+      }
+
+      if (this.mortarScrubProgress >= 100) {
+        // Interrompe il drag corrente e completa lo step della malta!
+        this.isDraggingBrickTool = false;
+        this.activeBrickToolType = null;
+        this.dragPointerId = null;
+        this.draggableTrowelPiece.classList.remove('dragging-source');
+        this.dragGhost.classList.add('hidden');
+        this.woodActiveTarget.classList.remove('drag-hover');
+
+        const boxRect = this.houseCanvasBox.getBoundingClientRect();
+        const relX = ((clientX - boxRect.left) / boxRect.width) * 100;
+        const relY = ((clientY - boxRect.top) / boxRect.height) * 100;
+        this.advanceBrickStep(relX, relY, 'mortar');
+      }
+    },
+
+    /**
+     * Valuta il rilascio della cazzuola:
+     * - Se il bambino l'ha portata nel punto giusto (anche con un passaggio breve), completa la stesura!
+     * - Se l'ha portata a un livello sbagliato della casa, suggerisce se andare più su o più giù.
+     */
+    evaluateTrowelRelease(clientX, clientY) {
+      if (this.activeHouseKey !== 'brick') return;
+      const houseState = this.state.houses.brick;
+      if (houseState.currentStep >= houseState.maxSteps) return;
+
+      if (this.isPointInElement(clientX, clientY, this.woodActiveTarget, 28)) {
+        // Se il bambino ha portato o passato la cazzuola nel punto giusto, completiamo la stesura
+        this.applyMortarScrub(100, clientX, clientY);
+        return;
+      }
+
+      if (this.mortarScrubProgress > 0) {
+        this.builderSpeechBubble.textContent =
+          'Continua a passare la cazzuola nel riquadro blu per finire di stendere la malta!';
+        return;
+      }
+
+      if (this.isPointInElement(clientX, clientY, this.houseCanvasBox, 0)) {
+        this.giveWrongLevelFeedback(clientY, 'la cazzuola con la malta', 'blu');
+        return;
+      }
+
+      global.SoundFX.gentleWrong();
+      this.builderSpeechBubble.textContent =
+        'Porta la cazzuola sulla casa e passala nel riquadro blu per spargere la malta!';
+    },
+
+    /**
+     * Valuta dove il bambino ha rilasciato i mattoni:
+     * - Se nel livello giusto (#wood-active-target): posa i mattoni e avanza!
+     * - Se a un livello sbagliato: dà un suggerimento.
+     */
+    evaluateBrickDrop(clientX, clientY) {
+      if (this.activeHouseKey !== 'brick') return;
+      const houseState = this.state.houses.brick;
+      if (houseState.currentStep >= houseState.maxSteps) return;
+
+      if (this.isPointInElement(clientX, clientY, this.woodActiveTarget, 28)) {
+        const boxRect = this.houseCanvasBox.getBoundingClientRect();
+        const relX = ((clientX - boxRect.left) / boxRect.width) * 100;
+        const relY = ((clientY - boxRect.top) / boxRect.height) * 100;
+        this.advanceBrickStep(relX, relY, 'brick');
+        return;
+      }
+
+      if (this.isPointInElement(clientX, clientY, this.houseCanvasBox, 0)) {
+        this.giveWrongLevelFeedback(clientY, 'i mattoni', 'verde');
+        return;
+      }
+
+      global.SoundFX.gentleWrong();
+      this.builderSpeechBubble.textContent =
+        'Trascina i mattoni fin dentro il riquadro verde sopra la malta!';
+    },
+
+    /**
+     * Messaggio di aiuto quando il bambino tocca un livello sbagliato (troppo alto o troppo basso).
+     */
+    giveWrongLevelFeedback(clientY, itemLabel, colorName) {
+      global.SoundFX.gentleWrong();
+      const targetRect = this.woodActiveTarget.getBoundingClientRect();
+      const targetCenterY = (targetRect.top + targetRect.bottom) / 2;
+
+      this.woodActiveTarget.classList.remove('wrong-flash');
+      void this.woodActiveTarget.offsetWidth;
+      this.woodActiveTarget.classList.add('wrong-flash');
+
+      if (clientY < targetCenterY) {
+        this.builderSpeechBubble.textContent = `Ops! Lì è troppo in ALTO! Porta ${itemLabel} più in BASSO nella zona ${colorName} illuminata!`;
+      } else {
+        this.builderSpeechBubble.textContent = `Ops! Lì è troppo in BASSO! Porta ${itemLabel} più in ALTO nella zona ${colorName} illuminata!`;
+      }
+    },
+
+    /**
+     * Avanza di uno step nella costruzione della Casa di Malta e Mattoni.
+     */
+    advanceBrickStep(fxPercentX = 50, fxPercentY = 65, actionType = 'brick') {
+      const houseState = this.state.houses.brick;
+      const nextStep = houseState.currentStep + 1;
+
+      if (actionType === 'mortar') {
+        global.SoundFX.mortarComplete(nextStep);
+        this.spawnParticles(['🥄', '💧', '✨', '🪣'], fxPercentX, fxPercentY);
+      } else {
+        global.SoundFX.brickPlace(nextStep);
+        this.spawnParticles(['🧱', '🔨', '⭐', '✨'], fxPercentX, fxPercentY);
+      }
+
+      this.state = global.SaveSystem.updateHouseStep('brick', nextStep);
+      this.triggerSaveToast();
+      this.renderBuilderState();
+
+      if (nextStep >= houseState.maxSteps) {
+        setTimeout(() => {
+          global.SoundFX.victory();
+          this.showVictoryModal('brick');
+        }, 650);
+      }
+    },
+
     moveDragGhost(clientX, clientY) {
       this.dragGhost.style.left = `${clientX}px`;
       this.dragGhost.style.top = `${clientY}px`;
@@ -598,21 +1014,7 @@
 
       // 2. Controlla se rilasciato sulla casa ma al livello sbagliato
       if (this.isPointInElement(clientX, clientY, this.houseCanvasBox, 0)) {
-        global.SoundFX.gentleWrong();
-        const targetRect = this.woodActiveTarget.getBoundingClientRect();
-        const targetCenterY = (targetRect.top + targetRect.bottom) / 2;
-
-        this.woodActiveTarget.classList.remove('wrong-flash');
-        void this.woodActiveTarget.offsetWidth;
-        this.woodActiveTarget.classList.add('wrong-flash');
-
-        if (clientY < targetCenterY) {
-          this.builderSpeechBubble.textContent =
-            'Ops! Lì è troppo in ALTO! Porta la legna più in BASSO nella zona verde illuminata!';
-        } else {
-          this.builderSpeechBubble.textContent =
-            'Ops! Lì è troppo in BASSO! Porta la legna più in ALTO nella zona verde illuminata!';
-        }
+        this.giveWrongLevelFeedback(clientY, 'la legna', 'verde');
         return;
       }
 
@@ -661,7 +1063,13 @@
       } else if (houseKey === 'wood') {
         this.victoryTitle.textContent = '🏆 Casetta di Legno Completata!';
         this.victoryMessage.textContent =
-          'Straordinario! Hai portato tutte le legna al livello giusto della casa! I tuoi progressi sono salvati!';
+          'Straordinario! Hai portato tutta la legna al livello giusto e hai sbloccato la Casetta di Mattoni!';
+        this.btnVictoryNext.classList.remove('hidden');
+        this.btnVictoryNext.textContent = '🧱 Costruisci la Casetta di Mattoni!';
+      } else if (houseKey === 'brick') {
+        this.victoryTitle.textContent = '🏰 Casetta di Malta e Mattoni Completata!';
+        this.victoryMessage.textContent =
+          'Capolavoro! Hai alternato malta e mattoni costruendo tutte e tre le casette dei Porcellini!';
         this.btnVictoryNext.classList.add('hidden');
       }
 
@@ -701,6 +1109,7 @@
       const allImages = [
         ...global.HOUSES_CONFIG.straw.images,
         ...global.HOUSES_CONFIG.wood.images,
+        ...global.HOUSES_CONFIG.brick.images,
         'Porcellini uniti.jfif',
         'Porcellino paglia.jfif',
         'Porcellino legno.jfif',
