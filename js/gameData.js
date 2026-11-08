@@ -178,122 +178,122 @@
       maxSteps: 12,
       images: [
         'Casa mattoni 0.jpg',
-        'Casa mattoni 1.jpg',
-        'Casa mattoni 2.jpg',
-        'Casa mattoni 3.jpg',
-        'Casa mattoni 4.jpg',
-        'Casa mattoni 5.jpg',
-        'Casa mattoni 6.jpg',
-        'Casa mattoni 7.jpg',
-        'Casa mattoni 8.jpg',
-        'Casa mattoni 9.jpg',
-        'Casa mattoni 10.jpg',
-        'Casa mattoni 10.jpg',
+        'Casa mattoni prog 1.jpg',
+        'Casa mattoni prog 2.jpg',
+        'Casa mattoni prog 3.jpg',
+        'Casa mattoni prog 4.jpg',
+        'Casa mattoni prog 5.jpg',
+        'Casa mattoni prog 6.jpg',
+        'Casa mattoni prog 7.jpg',
+        'Casa mattoni prog 8.jpg',
+        'Casa mattoni prog 9.jpg',
+        'Casa mattoni prog 10.jpg',
+        'Casa mattoni prog 11.jpg',
         'Casa mattoni finale.jpg'
       ],
       stepsInfo: [
         {
           actionType: 'mortar',
           courseNumber: 1,
-          targetZone: { top: 73, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 1: Spargi la Malta!',
+          targetZone: { top: 69, left: 17, width: 66, height: 15 },
+          levelName: '1. Base dei Muri: Spargi la Malta!',
           targetBadge: '🥄 Strofina qui la Cazzuola avanti e indietro!',
-          hint: 'Costruiamo la Casetta di Mattoni! Guardate la manina: prendete la cazzuola grigia e strofinatela avanti e indietro nel riquadro blu per spargere tutta la malta!'
+          hint: 'Costruiamo la Casetta di Mattoni! Guardate la manina: prendete la cazzuola grigia e strofinatela avanti e indietro in basso nel riquadro blu per spargere la malta!'
         },
         {
           actionType: 'brick',
           courseNumber: 1,
-          targetZone: { top: 73, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 1: Posa i Mattoni!',
+          targetZone: { top: 69, left: 17, width: 66, height: 15 },
+          levelName: '1. Base dei Muri: Posa i Mattoni!',
           targetBadge: '🧱 Porta qui i Mattoni rossi!',
-          hint: 'Bravo, la malta è stesa! Ora prendi i mattoni rossi qui sotto e portali nel riquadro verde!'
+          hint: 'Guardate quanta malta grigia! Ora prendete i mattoni rossi e portateli in basso nel riquadro verde!'
         },
         {
           actionType: 'mortar',
           courseNumber: 2,
-          targetZone: { top: 70, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 2: Spargi la Malta!',
+          targetZone: { top: 61, left: 17, width: 66, height: 15 },
+          levelName: '2. Sotto le Finestre: Spargi la Malta!',
           targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
-          hint: 'Adesso ci vuole altra malta! Prendi la cazzuola grigia e passala tante volte avanti e indietro nel riquadro blu!'
+          hint: 'I primi mattoni sono al loro posto! Prendete ancora la cazzuola grigia e strofinatela nel riquadro blu sotto le finestre!'
         },
         {
           actionType: 'brick',
           courseNumber: 2,
-          targetZone: { top: 70, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 2: Posa i Mattoni!',
+          targetZone: { top: 61, left: 17, width: 66, height: 15 },
+          levelName: '2. Sotto le Finestre: Posa i Mattoni!',
           targetBadge: '🧱 Porta qui i Mattoni rossi!',
-          hint: 'Perfetto! Ora prendi i mattoni rossi e portali sopra la malta nel riquadro verde!'
+          hint: 'Bravissimi, la malta è pronta! Ora portate i mattoni rossi nel riquadro verde fino alle finestre!'
         },
         {
           actionType: 'mortar',
           courseNumber: 3,
-          targetZone: { top: 67, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 3: Spargi la Malta!',
-          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
-          hint: 'Il muro cresce! Prendi ancora la cazzuola grigia e strofinala bene da un lato all\'altro nel riquadro blu!'
+          targetZone: { top: 53, left: 17, width: 66, height: 16 },
+          levelName: '3. Metà Muri e Finestre: Spargi la Malta!',
+          targetBadge: '🥄 Strofina la Cazzuola sui Muri Centrali!',
+          hint: 'Adesso saliamo a metà casa! Prendete la cazzuola grigia e strofinatela avanti e indietro nel riquadro blu vicino alle finestre!'
         },
         {
           actionType: 'brick',
           courseNumber: 3,
-          targetZone: { top: 67, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 3: Posa i Mattoni!',
+          targetZone: { top: 53, left: 17, width: 66, height: 16 },
+          levelName: '3. Metà Muri e Finestre: Posa i Mattoni!',
           targetBadge: '🧱 Porta qui i Mattoni rossi!',
-          hint: 'Molto bene! Ora prendi i mattoni rossi e posali nel riquadro verde!'
+          hint: 'La malta grigia è pronta! Ora portate i mattoni rossi nel riquadro verde per alzare i muri intorno alle finestre!'
         },
         {
           actionType: 'mortar',
           courseNumber: 4,
-          targetZone: { top: 64, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 4: Spargi la Malta!',
-          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
-          hint: 'Tocca ancora alla malta! Passa la cazzuola grigia avanti e indietro nel riquadro blu finché non è pieno!'
+          targetZone: { top: 44, left: 17, width: 66, height: 17 },
+          levelName: '4. Arco della Porta e Muri Alti: Spargi la Malta!',
+          targetBadge: '🥄 Strofina la Cazzuola sopra la Porta!',
+          hint: 'Saliamo ancora! Prendete la cazzuola grigia e strofinatela nel riquadro blu sopra l\'arco della porta e le finestre!'
         },
         {
           actionType: 'brick',
           courseNumber: 4,
-          targetZone: { top: 64, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 4: Posa i Mattoni!',
+          targetZone: { top: 44, left: 17, width: 66, height: 17 },
+          levelName: '4. Arco della Porta e Muri Alti: Posa i Mattoni!',
           targetBadge: '🧱 Porta qui i Mattoni rossi!',
-          hint: 'Bravissimo! Adesso trascina i mattoni rossi nel riquadro verde!'
+          hint: 'Perfetto! Adesso trascinate i mattoni rossi nel riquadro verde per completare l\'arco della porta e tutto il piano terra!'
         },
         {
           actionType: 'mortar',
           courseNumber: 5,
-          targetZone: { top: 61, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 5: Spargi la Malta!',
-          targetBadge: '🥄 Strofina la Cazzuola avanti e indietro!',
-          hint: 'Siamo quasi alle finestre! Prendi la cazzuola grigia e strofinala avanti e indietro nel riquadro blu!'
+          targetZone: { top: 22, left: 18, width: 42, height: 28 },
+          levelName: '5. Il Sottotetto: Spargi la Malta!',
+          targetBadge: '🥄 Strofina la Cazzuola sul Sottotetto!',
+          hint: 'Che alti questi muri! Ora prendete la cazzuola grigia e strofinatela avanti e indietro nel riquadro blu in alto sul sottotetto!'
         },
         {
           actionType: 'brick',
           courseNumber: 5,
-          targetZone: { top: 61, left: 17, width: 66, height: 13 },
-          levelName: 'Livello 5: Posa i Mattoni!',
-          targetBadge: '🧱 Porta qui i Mattoni rossi!',
-          hint: 'Ottimo! Ora porta i mattoni rossi nel riquadro verde sotto le finestre!'
+          targetZone: { top: 22, left: 18, width: 42, height: 28 },
+          levelName: '5. Il Sottotetto: Posa i Mattoni!',
+          targetBadge: '🧱 Porta qui i Mattoni per il Sottotetto!',
+          hint: 'Il sottotetto ha tutta la malta! Portate i mattoni rossi nel riquadro verde in alto per arrivare fino alla punta del tetto!'
         },
         {
           actionType: 'mortar',
           courseNumber: 6,
-          targetZone: { top: 28, left: 18, width: 64, height: 32 },
-          levelName: 'Parte Alta: Spargi la Malta!',
-          targetBadge: '🥄 Strofina la Cazzuola in alto!',
-          hint: 'Adesso prepariamo la parte alta della casa! Prendi la cazzuola grigia e passala avanti e indietro nel riquadro blu in alto!'
+          targetZone: { top: 8, left: 36, width: 52, height: 38 },
+          levelName: '6. Tetto e Camino: Spargi la Malta!',
+          targetBadge: '🥄 Strofina la Cazzuola su Tetto e Camino!',
+          hint: 'Mancano solo il tetto e il camino lassù in cima! Prendete la cazzuola grigia e strofinatela avanti e indietro nel riquadro blu in alto!'
         },
         {
           actionType: 'brick',
           courseNumber: 6,
-          targetZone: { top: 22, left: 18, width: 64, height: 38 },
-          levelName: 'Parte Alta: Posa Mattoni e Tetto!',
+          targetZone: { top: 8, left: 36, width: 52, height: 38 },
+          levelName: '6. Tetto e Camino: Ultimi Mattoni!',
           targetBadge: '🧱 Porta qui gli ultimi Mattoni!',
-          hint: 'Ultimo passo! Prendi i mattoni rossi e portali in alto nel riquadro verde per finire tutta la casa!'
+          hint: 'Ultimo passo! Prendete i mattoni rossi e portateli lassù nel riquadro verde per completare il tetto, il camino e tutta la casa!'
         },
         {
           actionType: 'done',
           targetZone: null,
           levelName: 'Casetta di Mattoni Completata!',
           targetBadge: 'Completata!',
-          hint: 'Urrà! Hai costruito una Casetta di Mattoni fortissima! I tre porcellini ti dicono grazie!'
+          hint: 'Urrà! Avete costruito una Casetta di Mattoni fortissima passo dopo passo! I tre porcellini vi dicono grazie!'
         }
       ]
     }

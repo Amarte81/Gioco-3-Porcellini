@@ -87,6 +87,7 @@
 
       this.houseCanvasBox = document.getElementById('house-canvas-box');
       this.houseStageImg = document.getElementById('house-stage-img');
+      this.houseStagePreviewImg = document.getElementById('house-stage-preview-img');
       this.woodLevelsOverlay = document.getElementById('wood-levels-overlay');
       this.woodActiveTarget = document.getElementById('wood-active-target');
       this.woodTargetLabel = document.getElementById('wood-target-label');
@@ -827,6 +828,10 @@
       this.mortarSpreadLayer.classList.add('hidden');
       this.upperMortarVisual.classList.add('hidden');
       this.woodActiveTarget.classList.remove('mortar-target-style');
+      if (this.houseStagePreviewImg) {
+        this.houseStagePreviewImg.classList.add('hidden');
+        this.houseStagePreviewImg.style.setProperty('--mortar-reveal', '0%');
+      }
 
       if (houseKey === 'straw') {
         this.toolPanelStraw.classList.remove('hidden');
@@ -856,11 +861,6 @@
       } else if (houseKey === 'brick') {
         this.toolPanelBrick.classList.remove('hidden');
 
-        // Se siamo allo step 11 (malta già stesa sui muri alti prima dell'ultimo step di mattoni), mostriamo l'indicatore
-        if (step === 11) {
-          this.upperMortarVisual.classList.remove('hidden');
-        }
-
         if (step < maxSteps && stepInfo.targetZone) {
           this.woodLevelsOverlay.classList.remove('hidden');
           const tz = stepInfo.targetZone;
@@ -876,6 +876,13 @@
             this.mortarSpreadLayer.classList.remove('hidden');
             this.mortarSpreadFill.style.width = '0%';
             this.trowelScrubBar.style.width = '0%';
+
+            if (this.houseStagePreviewImg) {
+              const nextMortarImg = cfg.images[Math.min(step + 1, cfg.images.length - 1)];
+              this.houseStagePreviewImg.src = nextMortarImg;
+              this.houseStagePreviewImg.style.setProperty('--mortar-reveal', '0%');
+              this.houseStagePreviewImg.classList.remove('hidden');
+            }
 
             this.trowelSourceSlot.classList.add('active-slot');
             this.trowelSourceSlot.classList.remove('locked-slot');
@@ -1167,6 +1174,9 @@
       const pct = Math.round(this.mortarScrubProgress);
       this.mortarSpreadFill.style.width = `${pct}%`;
       this.trowelScrubBar.style.width = `${pct}%`;
+      if (this.houseStagePreviewImg) {
+        this.houseStagePreviewImg.style.setProperty('--mortar-reveal', `${pct}%`);
+      }
 
       if (currFloor > prevFloor && this.mortarScrubProgress < 100) {
         global.SoundFX.mortarScrub();
